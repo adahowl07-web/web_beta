@@ -3,91 +3,105 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Sign Up</title>
+    <title>THE HILL - Sign Up</title>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
-
-    <style>
-        /* CSS GIAO DIỆN TINH TẾ (Giữ nguyên) */
-        body {
-            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
-            background-color: #f8f9fa;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            height: 100vh;
-            margin: 0;
-            overflow: hidden;
-            
-            background-image: url('https://suachualaptop24h.com/upload_images/images/2021/05/02/2561184c0d83292e2814a8db5dfe49e1.jpg'); 
-            background-size: cover; background-position: center; background-repeat: no-repeat; background-attachment: fixed;    
-        }
-        .container {
-            background-color: rgba(255, 255, 255, 0.3); 
-            backdrop-filter: blur(10px); -webkit-backdrop-filter: blur(10px); border: 1px solid rgba(255, 255, 255, 0.4); 
-            padding: 2.5rem; border-radius: 20px; box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.15); 
-            width: 300px; text-align: center; z-index: 10; position: relative; animation: fadeIn 0.8s ease-out; 
-        }
-        @keyframes fadeIn { from { opacity: 0; transform: translateY(-20px); } to { transform: translateY(0); } }
-        h2 { margin-top: 0; margin-bottom: 2rem; color: #ffffff; text-shadow: 1px 1px 5px rgba(0, 0, 0, 0.6); font-size: 2.2rem; letter-spacing: 1px; }
-        .input-group { position: relative; margin-bottom: 1.5rem; text-align: left; }
-        .input-group input { width: 100%; padding: 10px; border: 1px solid rgba(255, 255, 255, 0.4); background-color: #ffffff; border-radius: 6px; box-sizing: border-box; font-size: 1rem; color: #333333; outline: none; transition: border-color 0.3s ease, box-shadow 0.3s ease; -webkit-text-fill-color: #333333 !important; -webkit-box-shadow: 0 0 0 1000px #ffffff inset !important; }
-        .input-group input::placeholder { color: #e0e0e0; font-weight: 400; font-size: 0.9rem; opacity: 1; transition: color 0.3s ease; }
-        .input-group input:focus { border-color: #2E8CA2; box-shadow: 0 0 8px rgba(46, 140, 162, 0.5); }
-        .input-group input:focus::placeholder { color: transparent; }
-        .input-group label { display: none; }
-        .btn { background-color: #2E8CA2; color: white; padding: 0.75rem; border: none; border-radius: 6px; width: 100%; cursor: pointer; font-size: 1.0rem; font-weight: bold; margin-top: 1.5rem; transition: background-color 0.3s ease, opacity 0.3s ease, transform 0.3s ease, box-shadow 0.3s ease; }
-        .btn:hover { background-color: #287a90; transform: translateY(-2px); box-shadow: 0 8px 15px rgba(46, 140, 162, 0.4); }
-        .btn:disabled { background-color: #7abccb; opacity: 0.8; cursor: not-allowed; transform: none; box-shadow: none; }
-        .message { display: none; font-size: 0.875rem; padding: 0.75rem 1rem; border-radius: 6px; margin-top: 1rem; margin-bottom: 1rem; font-weight: 500; border: 1px solid; text-align: left; animation: slideIn 0.4s ease-out; }
-        #successMessage { background-color: rgba(180, 235, 235, 0.8); color: #00695c; border-color: #b2dfdb; }
-        #errorMessage { background-color: rgba(255, 205, 210, 0.8); color: #c62828; border-color: #ffcdd2; }
-        .login-link { margin-top: 1.8rem; font-size: 0.95rem; }
-        .login-link a { color: #ffffff; text-decoration: none; font-weight: 600; text-shadow: 0 0 5px rgba(0, 0, 0, 0.6); transition: color 0.3s ease, text-shadow 0.3s ease; }
-        .login-link span { color: #ffffff; text-shadow: 0 0 5px rgba(0, 0, 0, 0.6); }
-        .social-login { margin-top: 1.5rem; border-top: 1px solid rgba(255, 255, 255, 0.5); padding-top: 1.5rem; display: flex; flex-direction: column; gap: 0.8rem; }
-        .social-btn { padding: 0.75rem; border-radius: 6px; font-size: 1rem; cursor: pointer; transition: background-color 0.3s ease, box-shadow 0.3s ease, transform 0.3s ease; box-shadow: 0 2px 5px rgba(0,0,0,0.1); }
-        .facebook-btn { background-color: #3b5998; color: white; border: none; }
-        .google-btn { background-color: #ffffff; color: #757575; border: 1px solid #ddd; }
-    </style>
+    <link rel="stylesheet" href="login.css">
 </head>
 <body>
-    <div class="container">
-        <h2>Create Account</h2>
-        
-        <form id="signupForm" autocomplete="off" novalidate> 
-            <div class="input-group">
-                <input type="text" id="username" name="username" placeholder="Username" required autocomplete="username">
-                <label for="username">Username</label>
+    <div class="login-wrapper">
+        <!-- Left Side - Image -->
+        <div class="login-image">
+            <div class="image-content">
+                <img src="https://i.pinimg.com/1200x/38/d7/5b/38d75b61577fa7a3695893f7ab4f8a9c.jpg" alt="Fashion Collection">
             </div>
-            <div class="input-group">
-                <input type="email" id="email" name="email" placeholder="Email/Phone" required autocomplete="email">
-                <label for="email">Email</label>
-            </div>
-            <div class="input-group">
-                <input type="password" id="password" name="password" placeholder="Password" required autocomplete="new-password">
-                <label for="password">Password</label>
-            </div>
+        </div>
 
-            <p id="successMessage" class="message"></p>
-            <p id="errorMessage" class="message"></p>
+        <!-- Right Side - Form -->
+        <div class="login-form-container">
+            <div class="login-form-content">
+                <!-- Tab Navigation -->
+                <div class="form-tabs">
+                    <button class="form-tab" data-tab="login">Đăng Nhập</button>
+                    <button class="form-tab active" data-tab="signup">Đăng Ký</button>
+                </div>
 
-            <button type="submit" class="btn" id="submitButton" disabled>SIGN UP</button> 
+                <!-- Messages -->
+                <div id="successMessage" class="message message--success" role="alert"></div>
+                <div id="errorMessage" class="message message--error" role="alert"></div>
 
-            <div class="login-link">
-                <span>Already have an account? </span>
-                <a href="login.html">Log in</a>
+                <!-- Signup Form -->
+                <form id="signupForm" class="form-content active" data-form="signup" novalidate>
+                    <!-- Name Input -->
+                    <div class="form-group">
+                        <label for="signup-name">Họ Tên*</label>
+                        <input 
+                            type="text" 
+                            id="signup-name" 
+                            placeholder="" 
+                            required>
+                    </div>
+
+                    <!-- Email Input -->
+                    <div class="form-group">
+                        <label for="signup-email">Email*</label>
+                        <input 
+                            type="email" 
+                            id="signup-email" 
+                            placeholder="" 
+                            required
+                            autocomplete="email">
+                    </div>
+
+                    <!-- Password Input -->
+                    <div class="form-group">
+                        <label for="signup-password">Mật Khẩu*</label>
+                        <input 
+                            type="password" 
+                            id="signup-password" 
+                            placeholder="" 
+                            required
+                            autocomplete="new-password">
+                    </div>
+
+                    <!-- Confirm Password -->
+                    <div class="form-group">
+                        <label for="signup-confirm">Xác Nhận Mật Khẩu*</label>
+                        <input 
+                            type="password" 
+                            id="signup-confirm" 
+                            placeholder="" 
+                            required>
+                    </div>
+
+                    <!-- Submit Button -->
+                    <button type="submit" class="login-btn" id="signupButton" disabled>
+                        Đăng ký
+                    </button>
+
+                    <!-- Login Link -->
+                    <div class="form-forgot">
+                        <a href="login.html">Đã có tài khoản? Đăng nhập</a>
+                    </div>
+                </form>
             </div>
-
-            <div class="social-login">
-                <button type="button" class="social-btn google-btn">
-                    <i class="fab fa-google"></i> Sign up with Google
-                </button>
-                <button type="button" class="social-btn facebook-btn">
-                    <i class="fab fa-facebook-f"></i> Sign up with Facebook
-                </button>
-            </div>
-        </form>
+        </div>
     </div>
+
+    <script src="login.js"></script>
+    <script>
+        // Redirect to login page behavior
+        document.addEventListener('DOMContentLoaded', function() {
+            const loginTab = document.querySelector('[data-tab="login"]');
+            if (loginTab) {
+                loginTab.addEventListener('click', function(e) {
+                    e.preventDefault();
+                    window.location.href = 'login.html';
+                });
+            }
+        });
+    </script>
+</body>
+</html>
 
     <script>
         // SỬA PORT: Đã cập nhật thành 8083

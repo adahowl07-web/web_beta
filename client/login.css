@@ -1,125 +1,383 @@
-/* Dán toàn bộ code này vào file login.css */
+/* ================================
+   GLOBAL STYLES
+   ================================ */
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+html {
+    scroll-behavior: smooth;
+}
+
 body {
-    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
-    background-color: #f8f9fa;
+    font-family: 'Segoe UI', -apple-system, BlinkMacSystemFont, sans-serif;
+    background: #ffffff;
+    height: 100vh;
     display: flex;
     justify-content: center;
     align-items: center;
+    overflow: auto;
+}
+
+/* ================================
+   LOGIN WRAPPER - 2 COLUMN LAYOUT
+   ================================ */
+.login-wrapper {
+    display: flex;
+    width: 75%;
     height: 100vh;
-    margin: 0;
-
-    /* Ảnh nền của bạn */
-    background-image: url('https://suachualaptop24h.com/upload_images/images/2021/05/02/2561184c0d83292e2814a8db5dfe49e1.jpg'); 
-    background-size: cover;          
-    background-position: center;     
-    background-repeat: no-repeat;    
-    background-attachment: fixed;    
+    background: #ffffff;
+    margin: 0 auto;
 }
-.container {
-    background-color: #ffffff;
-    padding: 2.5rem;
-    border-radius: 12px;
-    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
-    width: 350px;
+
+/* ================================
+   LEFT SIDE - IMAGE
+   ================================ */
+.login-image {
+    flex: 0.85;
+    background: #f5f5f5;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    position: relative;
+    overflow: hidden;
+    height: 100vh;
+}
+
+.image-content {
+    position: relative;
+    width: 100%;
+    height: 100%;
+    display: flex;
+    flex-direction: column;
+    justify-content: flex-start;
+    align-items: center;
+}
+
+.image-content img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+}
+
+/* ================================
+   RIGHT SIDE - FORM
+   ================================ */
+.login-form-container {
+    flex: 1;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    padding: 20px 8px;
+    background: #ffffff;
+    height: 100vh;
+    overflow-y: auto;
+}
+
+.login-form-content {
+    width: 100%;
+    max-width: 300px;
+    margin: 0 auto;
+    padding: 30px 0;
+}
+
+/* ================================
+   FORM HEADER
+   ================================ */
+.form-header {
+    margin-bottom: 25px;
     text-align: center;
-    z-index: 10;
-    position: relative;
-}
-h2 {
-    margin-top: 0;
-    margin-bottom: 2rem;
-    color: #333;
-}
-.input-group {
-    position: relative;
-    margin-bottom: 1.5rem;
-    text-align: left;
-}
-.input-group input {
-    width: 100%;
-    padding: 10px;
-    border: 1px solid #ddd;
-    border-radius: 6px;
-    box-sizing: border-box; 
-    font-size: 1rem;
-}
-.input-group label {
-    position: absolute;
-    left: 10px;
-    top: 10px;
-    color: #999;
-    background-color: white;
-    padding: 0 5px;
-    transition: all 0.2s ease;
-    pointer-events: none;
-}
-.input-group input:focus + label,
-.input-group input:not(:placeholder-shown) + label {
-    top: -10px;
-    left: 10px;
-    font-size: 0.8rem;
-    color: #555;
 }
 
-.btn {
-    background-color: #795548; 
-    color: white;
-    padding: 0.75rem;
+.form-header h3 {
+    font-size: 10px;
+    font-weight: 700;
+    letter-spacing: 2px;
+    color: #888;
+    text-transform: uppercase;
+    margin-bottom: 8px;
+}
+
+.form-header h1 {
+    font-size: 26px;
+    font-weight: 400;
+    color: #000;
+    margin-bottom: 10px;
+    letter-spacing: 0.5px;
+}
+
+.form-header p {
+    font-size: 12px;
+    color: #888;
+    line-height: 1.6;
+    letter-spacing: 0.3px;
+}
+
+/* ================================
+   MESSAGES
+   ================================ */
+.message {
+    padding: 12px 15px;
+    border-radius: 4px;
+    margin-bottom: 20px;
+    font-size: 14px;
+    display: none;
+    animation: slideIn 0.3s ease-out;
+    border: 1px solid;
+}
+
+@keyframes slideIn {
+    from {
+        opacity: 0;
+        transform: translateY(-10px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+.message--success {
+    background: #d4edda;
+    color: #155724;
+    border-color: #c3e6cb;
+}
+
+.message--error {
+    background: #f8d7da;
+    color: #721c24;
+    border-color: #f5c6cb;
+}
+
+/* ================================
+   FORM TABS
+   ================================ */
+.form-tabs {
+    display: flex;
+    margin-bottom: 25px;
+    border-bottom: 1px solid #ddd;
+}
+
+.form-tab {
+    flex: 1;
+    padding: 12px 0;
     border: none;
-    border-radius: 6px;
-    width: 100%;
+    background: transparent;
+    font-size: 14px;
+    font-weight: 500;
+    color: #888;
     cursor: pointer;
-    font-size: 1.0rem; 
-    font-weight: bold;
-    margin-top: 1rem;
-    transition: background-color 0.2s ease, opacity 0.2s ease;
-}
-.btn:hover {
-    background-color: #5d4037;
+    transition: all 0.3s ease;
+    border-bottom: 3px solid transparent;
+    position: relative;
+    bottom: -1px;
+    text-align: center;
 }
 
-.btn:disabled {
-    background-color: #a1887f; 
-    opacity: 0.7;
+.form-tab.active {
+    color: #000;
+    border-bottom-color: #000;
+}
+
+.form-tab:hover {
+    color: #000;
+}
+
+/* ================================
+   FORM CONTENT
+   ================================ */
+.form-content {
+    display: none;
+}
+
+.form-content.active {
+    display: block;
+}
+
+/* ================================
+   FORM GROUPS
+   ================================ */
+.form-group {
+    margin-bottom: 18px;
+}
+
+.form-group label {
+    display: block;
+    margin-bottom: 8px;
+    font-size: 12px;
+    font-weight: 500;
+    color: #333;
+    letter-spacing: 0;
+    text-transform: none;
+}
+
+.form-group input {
+    width: 100%;
+    padding: 12px 10px;
+    border: 1px solid #ccc;
+    border-radius: 0;
+    font-size: 13px;
+    transition: border-color 0.2s ease;
+    font-family: inherit;
+    background: transparent;
+    color: #333;
+    -webkit-appearance: none;
+    -moz-appearance: none;
+    appearance: none;
+    box-shadow: none;
+}
+
+.form-group input:focus {
+    outline: none;
+    border-color: #999;
+    background: transparent;
+    box-shadow: none;
+}
+
+.form-group input::placeholder {
+    color: #999;
+}
+
+/* ================================
+   FORGOT PASSWORD
+   ================================ */
+.form-forgot {
+    text-align: right;
+    margin-bottom: 20px;
+}
+
+.form-forgot a {
+    font-size: 12px;
+    color: #333;
+    text-decoration: none;
+    transition: color 0.2s ease;
+}
+
+.form-forgot a:hover {
+    color: #000;
+}
+
+.form-forgot a:focus {
+    outline: 2px solid #000;
+    outline-offset: 2px;
+}
+
+/* ================================
+   SUBMIT BUTTON
+   ================================ */
+.login-btn {
+    width: 100%;
+    padding: 14px 0;
+    background: #000;
+    color: #fff;
+    border: none;
+    font-size: 13px;
+    font-weight: 500;
+    letter-spacing: 0;
+    text-transform: none;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    margin-bottom: 15px;
+    height: auto;
+    min-height: 44px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.login-btn:hover:not(:disabled) {
+    background: #000;
+    border-color: #000;
+}
+
+.login-btn:focus {
+    outline: none;
+    background: #000;
+    border-color: #000;
+}
+
+.login-btn:disabled {
+    opacity: 0.5;
     cursor: not-allowed;
 }
-.btn:disabled:hover {
-    background-color: #a1887f;
+
+/* ================================
+   RESPONSIVE DESIGN
+   ================================ */
+@media (max-width: 1024px) {
+    .login-wrapper {
+        flex-direction: column;
+    }
+
+    .login-image {
+        min-height: 300px;
+        order: -1;
+    }
+
+    .login-form-container {
+        padding: 40px 30px;
+    }
 }
 
-.message {
-    display: none; 
-    font-size: 0.875rem;      
-    padding: 0.75rem 1rem;   
-    border-radius: 6px;
-    margin-top: 1rem; 
-    margin-bottom: 1rem;     
-    font-weight: 500;
-    border: 1px solid;
-    text-align: left;        
-}
-#successMessage {
-    background-color: #e6fffa;
-    color: #00695c;
-    border-color: #b2dfdb;
-}
-#errorMessage {
-    background-color: #ffebee;
-    color: #c62828;
-    border-color: #ffcdd2;
+@media (max-width: 768px) {
+    .login-form-container {
+        padding: 30px 20px;
+    }
+
+    .login-form-content {
+        max-width: 100%;
+    }
+
+    .form-header h1 {
+        font-size: 28px;
+    }
+
+    .image-header {
+        padding: 30px;
+    }
+
+    .image-header h2 {
+        font-size: 24px;
+    }
 }
 
-.links {
-    display: flex;
-    justify-content: space-between; 
-    margin-top: 1.5rem;
-    font-size: 0.9rem;
+@media (max-width: 480px) {
+    .form-header h1 {
+        font-size: 24px;
+    }
+
+    .form-header p {
+        font-size: 12px;
+    }
+
+    .image-header {
+        padding: 20px;
+    }
+
+    .image-header h2 {
+        font-size: 18px;
+    }
+
+    .image-header p {
+        font-size: 10px;
+    }
 }
-.links a {
-    color: #795548; 
-    text-decoration: none;
-    font-weight: 600;
+
+/* ================================
+   ACCESSIBILITY
+   ================================ */
+@media (prefers-reduced-motion: reduce) {
+    * {
+        animation-duration: 0.01ms !important;
+        animation-iteration-count: 1 !important;
+        transition-duration: 0.01ms !important;
+    }
 }
-.links a:hover {
-    text-decoration: underline;
+
+/* Focus visible for keyboard navigation */
+:focus-visible {
+    outline: 2px solid #000;
+    outline-offset: 2px;
 }
