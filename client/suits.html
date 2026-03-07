@@ -1,0 +1,364 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>SUITS & BLAZERS - THE HILL</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+    <style>
+        :root { --color-primary: #000000; --color-secondary: #333333; --color-red: #b80d0d; --color-text-light: #ffffff; --color-background: #f8f8f8; }
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body { font-family: Arial, sans-serif; background-color: var(--color-background); color: var(--color-primary); }
+        .nav-group-wrapper { position: fixed; top: 0; width: 100%; z-index: 100; transition: transform 0.3s ease-in-out; }
+        .nav-group-wrapper.hidden { transform: translateY(-100%); }
+        .top-bar { background-color: var(--color-primary); color: var(--color-text-light); font-size: 0.65rem; display: flex; justify-content: space-between; padding: 7px 40px; }
+        .top-bar a { color: var(--color-text-light); text-decoration: none; margin-right: 20px; font-weight: 400; font-size: 0.65rem; }
+        .top-bar-right { display: flex; align-items: center; }
+        .main-navbar { display: flex; justify-content: space-between; align-items: center; padding: 15px 40px; background-color: #ffffff; border-bottom: 1px solid #f0f0f0; }
+        .logo-main { font-size: 1.3rem; font-weight: 700; letter-spacing: 1px; color: var(--color-primary); text-transform: uppercase; text-decoration: none; cursor: pointer; margin: 0 auto; }
+        .main-menu { display: flex; gap: 20px; }
+        .main-menu a { text-decoration: none; color: var(--color-primary); font-weight: 400; font-size: 0.75rem; text-transform: uppercase; white-space: nowrap; }
+        .nav-icons { display: flex; gap: 18px; margin-left: auto; margin-right: 20px; }
+        .nav-icons i { font-size: 1rem; cursor: pointer; }
+        .nav-icons .cart-icon { position: relative; }
+        .nav-icons .cart-count { background-color: var(--color-primary); color: white; border-radius: 50%; padding: 2px 5px; font-size: 0.6rem; position: absolute; top: -8px; right: -8px; }
+        .sub-menu-bar { background-color: #ffffff; display: flex; padding: 10px 40px; border-bottom: 1px solid #f0f0f0; gap: 15px; font-size: 0.75rem; }
+        .sub-menu-bar a { text-decoration: none; color: var(--color-secondary); white-space: nowrap; }
+        .sub-menu-bar a:hover { color: var(--color-red); }
+        .content-buffer { height: 110px; }
+        .page-title-section { background-color: #ffffff; padding: 40px; text-align: center; border-bottom: 1px solid #f0f0f0; }
+        .page-title { font-size: 2rem; font-weight: 700; color: var(--color-primary); text-transform: uppercase; letter-spacing: 2px; margin-bottom: 10px; }
+        .page-subtitle { font-size: 0.95rem; color: var(--color-secondary); }
+        .page-grid-section { padding: 40px; max-width: 1400px; margin: 0 auto; }
+        .products-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 25px; }
+        .product-card { position: relative; background-color: white; border-radius: 8px; overflow: hidden; box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08); transition: transform 0.3s ease; cursor: pointer; }
+        .product-card:hover { transform: translateY(-5px); box-shadow: 0 6px 16px rgba(0, 0, 0, 0.12); }
+        .product-image { width: 100%; height: 320px; background-size: cover; background-position: center; position: relative; }
+        .product-badge { position: absolute; top: 10px; right: 10px; background-color: var(--color-red); color: white; padding: 6px 12px; font-size: 0.7rem; font-weight: 700; text-transform: uppercase; border-radius: 4px; z-index: 10; }
+        .product-info { padding: 15px; text-align: center; }
+        .product-brand { font-size: 0.7rem; color: var(--color-secondary); text-transform: uppercase; font-weight: 700; margin-bottom: 8px; }
+        .product-name { font-size: 0.9rem; font-weight: 400; color: var(--color-primary); margin-bottom: 10px; }
+        .product-price { font-size: 0.95rem; font-weight: 700; color: var(--color-primary); margin-bottom: 10px; }
+        .add-to-cart-btn { width: 100%; background-color: var(--color-primary); color: white; padding: 10px; border: none; border-radius: 4px; font-size: 0.85rem; font-weight: 600; cursor: pointer; text-transform: uppercase; }
+        .add-to-cart-btn:hover { background-color: var(--color-secondary); }
+        @media (max-width: 1024px) { .products-grid { grid-template-columns: repeat(3, 1fr); } }
+        @media (max-width: 768px) { .products-grid { grid-template-columns: repeat(2, 1fr); } }
+        @media (max-width: 480px) { .products-grid { grid-template-columns: 1fr; } }
+        .footer { background-color: var(--color-primary); color: var(--color-text-light); padding: 40px; margin-top: 40px; }
+        .footer-content { max-width: 1200px; margin: 0 auto; }
+        .footer-contact { display: grid; grid-template-columns: 2fr 1fr; gap: 30px; }
+        .contact-info h3 { font-size: 0.95rem; font-weight: 700; margin-bottom: 15px; }
+        .contact-info p { font-size: 0.85rem; color: #aaa; }
+        .social-links { display: flex; gap: 15px; }
+        .social-links a { display: inline-flex; width: 40px; height: 40px; align-items: center; justify-content: center; background-color: rgba(255,255,255,0.1); border-radius: 50%; color: white; text-decoration: none; }
+    </style>
+
+        /* --- MODAL STYLES --- */
+        .modal { display: none; position: fixed; z-index: 200; left: 0; top: 0; width: 100%; height: 100%; background-color: rgba(0,0,0,0.5); pointer-events: none; }
+        .modal.active { display: flex; align-items: center; justify-content: center; pointer-events: auto; }
+        .modal-content { background-color: white; border-radius: 8px; width: 95%; max-width: 900px; max-height: 90vh; overflow-y: auto; position: relative; pointer-events: auto; display: flex; flex-direction: column; }
+        .modal-close { position: absolute; top: 15px; right: 15px; font-size: 1.5rem; cursor: pointer; color: #999; transition: color 0.3s ease; z-index: 10; }
+        .modal-close:hover { color: var(--color-primary); }
+        .modal-header { padding: 20px 30px; border-bottom: 1px solid #f0f0f0; }
+        .modal-title { font-size: 1.2rem; font-weight: 700; color: var(--color-primary); margin: 0; }
+        .modal-body { flex: 1; padding: 30px; overflow-y: auto; }
+        .cart-items-list { display: flex; flex-direction: column; gap: 25px; }
+        .modal-item { display: flex; gap: 20px; padding-bottom: 25px; border-bottom: 1px solid #f0f0f0; }
+        .modal-item:last-of-type { border-bottom: none; }
+        .modal-item-image { width: 140px; height: 140px; background-size: cover; background-position: center; border-radius: 4px; flex-shrink: 0; }
+        .modal-item-info { flex: 1; display: flex; flex-direction: column; justify-content: space-between; }
+        .modal-item-header { }
+        .modal-item-brand { font-size: 0.65rem; color: var(--color-secondary); text-transform: uppercase; margin-bottom: 8px; font-weight: 700; }
+        .modal-item-name { font-weight: 400; color: var(--color-primary); font-size: 0.95rem; margin-bottom: 12px; line-height: 1.4; }
+        .modal-item-price { font-weight: 700; color: var(--color-primary); font-size: 1rem; margin-bottom: 15px; }
+        .modal-item-controls { display: flex; align-items: center; gap: 20px; }
+        .quantity-control { display: flex; align-items: center; border: 1px solid #ddd; border-radius: 4px; }
+        .quantity-control button { background: none; border: none; padding: 8px 12px; cursor: pointer; font-size: 0.9rem; color: var(--color-primary); font-weight: 600; transition: background-color 0.2s ease; }
+        .quantity-control button:hover { background-color: #f0f0f0; }
+        .quantity-control input { width: 50px; border: none; text-align: center; font-weight: 600; padding: 8px 0; }
+        .modal-item-total { font-weight: 700; color: var(--color-primary); font-size: 0.95rem; }
+        .modal-remove-btn { background: none; border: none; color: var(--color-red); cursor: pointer; font-size: 0.8rem; text-decoration: underline; transition: color 0.3s ease; margin-left: auto; }
+        .modal-remove-btn:hover { color: #8b0a0a; }
+        .modal-footer { padding: 30px; border-top: 1px solid #f0f0f0; background-color: #f9f9f9; }
+        .order-summary { display: flex; flex-direction: column; gap: 15px; margin-bottom: 20px; }
+        .summary-row { display: flex; justify-content: space-between; align-items: center; font-size: 0.95rem; }
+        .summary-label { color: var(--color-secondary); }
+        .summary-value { font-weight: 600; color: var(--color-primary); }
+        .summary-total { border-top: 1px solid #ddd; padding-top: 15px; font-size: 1.1rem; }
+        .summary-total .summary-value { color: var(--color-red); font-size: 1.1rem; }
+        .checkout-btn { width: 100%; background-color: var(--color-primary); color: white; padding: 14px; border: none; border-radius: 4px; font-weight: 700; text-transform: uppercase; cursor: pointer; transition: background-color 0.3s ease; font-size: 0.95rem; }
+        .checkout-btn:hover { background-color: #333; }
+        .modal-empty { text-align: center; padding: 60px 30px; color: var(--color-secondary); }
+</head>
+<body>
+    <header class="nav-group-wrapper">
+        <div class="top-bar">
+            <div class="top-bar-left"><a href="#">HOT DEALS</a><a href="#">NEW ARRIVALS</a></div>
+            <div class="top-bar-right"><a href="#"><i class="fas fa-map-marker-alt"></i> FIND STORE</a><a href="#">CALL US</a></div>
+        </div>
+        <nav class="main-navbar">
+            <div class="main-menu"><a href="clothing.html">CLOTHING</a><a href="accessories.html">ACCESSORIES</a><a href="leather-goods.html">LEATHER GOODS</a><a href="brand.html">BRAND</a><a href="usa-activewear.html">USA ACTIVEWEAR</a></div>
+            <a href="index.html" class="logo-main">ARISTINO</a>
+            <div class="nav-icons" id="authIcons"></div>
+        </nav>
+        <div class="sub-menu-bar"><a href="collection.html">Collection</a><a href="new-arrivals.html">New Arrivals</a><a href="shirts.html">Shirts</a><a href="pants.html">Pants</a><a href="suits.html">Suits & Blazer</a><a href="sets.html">Sets</a><a href="underwear.html">Underwear</a></div>
+    </header>
+    <div class="content-buffer"></div>
+    <div class="page-title-section">
+        <h1 class="page-title">Suits & Blazers</h1>
+        <p class="page-subtitle">Elegant suits and blazers for the modern gentleman</p>
+    </div>
+    <div class="page-grid-section">
+        <div class="products-grid" id="productsGrid"></div>
+    </div>
+    <footer class="footer">
+        <div class="footer-content">
+            <div class="footer-contact">
+                <div class="contact-info"><h3>ARISTINO</h3><p>Premium men's fashion.</p><p><a href="tel:1800622666" style="color: #ccc;">1800.622.666</a></p></div>
+                <div class="contact-info"><h3>Follow Us</h3><div class="social-links"><a href="#"><i class="fab fa-facebook-f"></i></a><a href="#"><i class="fab fa-instagram"></i></a></div></div>
+            </div>
+        </div>
+    </footer>
+    <script>
+        const products = [
+            { id: 1, name: "Premium Business Suit", brand: "ARISTINO", price: 4500000, image: "https://cdn.hstatic.net/products/200000887901/img_5896.1_79dac8bc14d842148a4a72f3b8a54192.jpg", badge: "HOT" },
+            { id: 2, name: "Classic Navy Blazer", brand: "ARISTINO", price: 3200000, image: "https://cdn.hstatic.net/products/200000887901/dsc07728_eadc00bcd0454534b3bf970b79b82ddf.jpg", badge: null },
+            { id: 3, name: "Wool Designer Suit", brand: "ARISTINO", price: 5200000, image: "https://cdn.hstatic.net/products/200000887901/img_6502.1_73b19f6e77bc465a8f94c34f539b8832.jpg", badge: "NEW" },
+            { id: 4, name: "Charcoal Formal Suit", brand: "ARISTINO", price: 4800000, image: "https://cdn.hstatic.net/products/200000887901/dsc07785_4ec6befddcd04d439cebc00e1a11a1cd.jpg", badge: null }
+        ];
+        function checkAuthStatus() { return localStorage.getItem('authToken'); }
+        function updateAuthUI() {
+            const container = document.getElementById('authIcons');
+            container.innerHTML = '';
+            const searchIcon = document.createElement('i');
+            searchIcon.classList.add('fas', 'fa-search');
+            container.appendChild(searchIcon);
+            const authWrapper = document.createElement('div');
+            if (checkAuthStatus()) {
+                const logoutIcon = document.createElement('i');
+                logoutIcon.classList.add('fas', 'fa-sign-out-alt');
+                logoutIcon.onclick = () => { if(confirm("Logout?")) { localStorage.removeItem('authToken'); window.location.href='index.html'; } };
+                authWrapper.appendChild(logoutIcon);
+            } else {
+                const loginLink = document.createElement('a');
+                loginLink.href = 'login.html';
+                loginLink.innerHTML = '<i class="fas fa-user"></i>';
+                authWrapper.appendChild(loginLink);
+            }
+            container.appendChild(authWrapper);
+            const cartIcon = document.createElement('div');
+            cartIcon.classList.add('cart-icon');
+            cartIcon.innerHTML = '<i class="fas fa-shopping-bag"></i><span class="cart-count">0</span>';
+            container.appendChild(cartIcon);
+        }
+        function renderProducts(items) {
+            const grid = document.getElementById('productsGrid');
+            grid.innerHTML = '';
+            items.forEach(product => {
+                const card = document.createElement('div');
+                card.className = 'product-card';
+                let badgeHTML = product.badge ? `<span class="product-badge">${product.badge}</span>` : '';
+                card.innerHTML = `<div class="product-image" style="background-image: url('${product.image}');">${badgeHTML}</div><div class="product-info"><div class="product-brand">${product.brand}</div><div class="product-name">${product.name}</div><div class="product-price">${product.price.toLocaleString('vi-VN')}₫</div><button class="add-to-cart-btn">Add to Cart</button></div>`;
+                grid.appendChild(card);
+            });
+        }
+        document.addEventListener('DOMContentLoaded', function() {
+            updateAuthUI();
+            renderProducts(products);
+            const header = document.querySelector('.nav-group-wrapper');
+            let lastScrollY = window.pageYOffset;
+            window.addEventListener('scroll', () => {
+                const currentScrollY = window.pageYOffset;
+                if (currentScrollY > 10) {
+                    if (currentScrollY < lastScrollY) { header.classList.remove('hidden'); }
+                    else { header.classList.add('hidden'); }
+                } else { header.classList.remove('hidden'); }
+                lastScrollY = currentScrollY;
+            });
+        });
+    </script>
+
+        function showCartModal() {
+            const cart = localStorage.getItem('cart') ? JSON.parse(localStorage.getItem('cart')) : [];
+            const cartItemsDiv = document.getElementById('cartItems');
+            const orderSummaryDiv = document.getElementById('orderSummary');
+
+            if (cart.length === 0) {
+                cartItemsDiv.innerHTML = '<div class="modal-empty">Giỏ hàng trống</div>';
+                orderSummaryDiv.innerHTML = '';
+            } else {
+                let html = '<div class="cart-items-list">';
+                let totalPrice = 0;
+
+                cart.forEach((item, index) => {
+                    const itemTotal = (item.price || 0) * (item.quantity || 1);
+                    totalPrice += itemTotal;
+
+                    html += `
+                        <div class="modal-item">
+                            <div class="modal-item-image" style="background-image: url('${item.image}')"></div>
+                            <div class="modal-item-info">
+                                <div class="modal-item-header">
+                                    <div class="modal-item-brand">${item.brand || 'ARISTINO'}</div>
+                                    <div class="modal-item-name">${item.name}</div>
+                                    <div class="modal-item-price">${(item.price || 0).toLocaleString('vi-VN')}₫</div>
+                                </div>
+                                <div class="modal-item-controls">
+                                    <div class="quantity-control">
+                                        <button onclick="updateQuantity(${index}, -1)">−</button>
+                                        <input type="number" value="${item.quantity || 1}" readonly>
+                                        <button onclick="updateQuantity(${index}, 1)">+</button>
+                                    </div>
+                                    <div class="modal-item-total">${itemTotal.toLocaleString('vi-VN')}₫</div>
+                                    <button class="modal-remove-btn" onclick="removeFromCart(${index})">Xóa</button>
+                                </div>
+                            </div>
+                        </div>
+                    `;
+                });
+
+                html += '</div>';
+                cartItemsDiv.innerHTML = html;
+
+                // Render order summary
+                const shippingFee = 30000;
+                const finalTotal = totalPrice + shippingFee;
+
+                orderSummaryDiv.innerHTML = `
+                    <div class="summary-row">
+                        <span class="summary-label">Tạm tính:</span>
+                        <span class="summary-value">${totalPrice.toLocaleString('vi-VN')}₫</span>
+                    </div>
+                    <div class="summary-row">
+                        <span class="summary-label">Phí vận chuyển:</span>
+                        <span class="summary-value">${shippingFee.toLocaleString('vi-VN')}₫</span>
+                    </div>
+                    <div class="summary-row summary-total">
+                        <span class="summary-label">Tổng cộng:</span>
+                        <span class="summary-value">${finalTotal.toLocaleString('vi-VN')}₫</span>
+                    </div>
+                `;
+            }
+
+            document.getElementById('cartModal').classList.add('active');
+        }
+
+        function closeCartModal() {
+            document.getElementById('cartModal').classList.remove('active');
+        }
+
+        function updateQuantity(index, change) {
+            let cart = localStorage.getItem('cart') ? JSON.parse(localStorage.getItem('cart')) : [];
+            if (cart[index]) {
+                const newQuantity = (cart[index].quantity || 1) + change;
+                if (newQuantity > 0) {
+                    cart[index].quantity = newQuantity;
+                    localStorage.setItem('cart', JSON.stringify(cart));
+                    showCartModal();
+                }
+            }
+        }
+
+        function handleCheckout() {
+            const cart = localStorage.getItem('cart') ? JSON.parse(localStorage.getItem('cart')) : [];
+            if (cart.length === 0) {
+                alert('Giỏ hàng trống!');
+                return;
+            }
+            alert('Chức năng thanh toán sẽ được triển khai sớm!');
+            // TODO: Redirect to checkout page
+        }
+
+        function removeFromCart(index) {
+            let cart = localStorage.getItem('cart') ? JSON.parse(localStorage.getItem('cart')) : [];
+            cart.splice(index, 1);
+            localStorage.setItem('cart', JSON.stringify(cart));
+
+            // Update UI
+            const cartCount = document.querySelector('.cart-count');
+            if (cartCount) {
+                cartCount.textContent = cart.length;
+            }
+
+            // Refresh modal
+            showCartModal();
+        }
+
+        function showWishlistModal() {
+            const wishlist = localStorage.getItem('wishlist') ? JSON.parse(localStorage.getItem('wishlist')) : [];
+            const wishlistItemsDiv = document.getElementById('wishlistItems');
+
+            if (wishlist.length === 0) {
+                wishlistItemsDiv.innerHTML = '<div class="modal-empty">Danh sách yêu thích trống</div>';
+            } else {
+                let html = '';
+                wishlist.forEach((item, index) => {
+                    // Handle both old format (string) and new format (object)
+                    const itemName = typeof item === 'string' ? item : item.name;
+                    const itemImage = typeof item === 'object' ? item.image : '';
+                    const itemBrand = typeof item === 'object' ? item.brand : '';
+                    const itemPrice = typeof item === 'object' ? item.price : 0;
+
+                    html += `
+                        <div class="modal-item">
+                            ${itemImage ? `<div class="modal-item-image" style="background-image: url('${itemImage}')"></div>` : ''}
+                            <div class="modal-item-info">
+                                ${itemBrand ? `<div class="modal-item-brand">${itemBrand}</div>` : ''}
+                                <div class="modal-item-name">${itemName}</div>
+                                ${itemPrice ? `<div class="modal-item-price">${itemPrice.toLocaleString('vi-VN')}₫</div>` : ''}
+                                <button class="modal-remove-btn" onclick="removeFromWishlist(${index})">Xóa</button>
+                            </div>
+                        </div>
+                    `;
+                });
+                wishlistItemsDiv.innerHTML = html;
+            }
+
+            document.getElementById('wishlistModal').classList.add('active');
+        }
+
+        function closeWishlistModal() {
+            document.getElementById('wishlistModal').classList.remove('active');
+        }
+
+        function removeFromWishlist(index) {
+            let wishlist = localStorage.getItem('wishlist') ? JSON.parse(localStorage.getItem('wishlist')) : [];
+            wishlist.splice(index, 1);
+            localStorage.setItem('wishlist', JSON.stringify(wishlist));
+
+            // Update UI
+            const wishlistCount = document.querySelector('.wishlist-count');
+            if (wishlistCount) {
+                wishlistCount.textContent = wishlist.length;
+            }
+
+            // Refresh modal
+            showWishlistModal();
+        }
+</body>
+
+    <!-- MODALS -->
+    <div id="cartModal" class="modal">
+        <div class="modal-content">
+            <span class="modal-close" onclick="closeCartModal()">&times;</span>
+            <div class="modal-header">
+                <h2 class="modal-title">Giỏ Hàng</h2>
+            </div>
+            <div class="modal-body">
+                <div id="cartItems"></div>
+            </div>
+            <div class="modal-footer">
+                <div class="order-summary" id="orderSummary"></div>
+                <button class="checkout-btn" onclick="handleCheckout()">THANH TOÁN</button>
+            </div>
+        </div>
+    </div>
+
+    <div id="wishlistModal" class="modal">
+        <div class="modal-content">
+            <span class="modal-close" onclick="closeWishlistModal()">&times;</span>
+            <div class="modal-title">Danh Sách Yêu Thích</div>
+            <div id="wishlistItems"></div>
+        </div>
+    </div>
+</html>
