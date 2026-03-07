@@ -562,6 +562,12 @@
         .checkout-btn { width: 100%; background-color: var(--color-primary); color: white; padding: 14px; border: none; border-radius: 4px; font-weight: 700; text-transform: uppercase; cursor: pointer; transition: background-color 0.3s ease; font-size: 0.95rem; }
         .checkout-btn:hover { background-color: #333; }
         .modal-empty { text-align: center; padding: 60px 30px; color: var(--color-secondary); }
+
+        /* Size Selection Styles */
+        .size-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 12px; margin: 30px 0; }
+        .size-btn { padding: 15px; border: 2px solid #ddd; background-color: #fff; color: var(--color-primary); cursor: pointer; font-weight: 600; font-size: 1rem; border-radius: 4px; transition: all 0.3s ease; }
+        .size-btn:hover { border-color: var(--color-primary); background-color: #f5f5f5; }
+        .size-btn.selected { border-color: var(--color-primary); background-color: var(--color-primary); color: white; }
     </style>
 </head>
 <body>
@@ -795,6 +801,11 @@
 
     <script>
         const AUTH_TOKEN_KEY = 'authToken';
+        let selectedSize = null;
+        let selectedProductForForm = null;
+
+        // Default sizes for products
+        const DEFAULT_SIZES = ['XS', 'S', 'M', 'L', 'XL', 'XXL'];
 
         function checkAuthStatus() {
             return localStorage.getItem(AUTH_TOKEN_KEY);
@@ -874,6 +885,7 @@
                                     <div class="modal-item-brand">${item.brand || 'ARISTINO'}</div>
                                     <div class="modal-item-name">${item.name}</div>
                                     <div class="modal-item-price">${(item.price || 0).toLocaleString('vi-VN')}₫</div>
+                                    ${item.size ? `<div style="font-size: 0.85rem; color: var(--color-secondary); margin-top: 5px;">Size: ${item.size}</div>` : ''}
                                 </div>
                                 <div class="modal-item-controls">
                                     <div class="quantity-control">
@@ -952,6 +964,48 @@
             }
             alert('Chức năng thanh toán sẽ được triển khai sớm!');
             // TODO: Redirect to checkout page
+        }
+
+        function selectSize(size) {
+            selectedSize = size;
+            const sizeButtons = document.querySelectorAll('.size-btn');
+            sizeButtons.forEach(btn => {
+                if (btn.textContent === size) {
+                    btn.classList.add('selected');
+                } else {
+                    btn.classList.remove('selected');
+                }
+            });
+        }
+
+        function confirmSize() {
+            if (!selectedSize) {
+                alert('Vui lòng chọn kích cỡ!');
+                return;
+            }
+
+            let cart = localStorage.getItem('cart') ? JSON.parse(localStorage.getItem('cart')) : [];
+            const productToAdd = {
+                ...selectedProductForForm,
+                size: selectedSize,
+                quantity: 1
+            };
+            cart.push(productToAdd);
+            localStorage.setItem('cart', JSON.stringify(cart));
+
+            const cartCount = document.querySelector('.cart-count');
+            if (cartCount) {
+                cartCount.textContent = cart.length;
+            }
+
+            closeSizeModal();
+            alert('Sản phẩm đã được thêm vào giỏ hàng!');
+        }
+
+        function closeSizeModal() {
+            document.getElementById('sizeModal').classList.remove('active');
+            selectedSize = null;
+            selectedProductForForm = null;
         }
 
         function showWishlistModal() {
@@ -1088,17 +1142,20 @@
                     brand: 'The Hill'
                 };
 
-                let cart = localStorage.getItem('cart') ? JSON.parse(localStorage.getItem('cart')) : [];
-                cart.push(product);
-                localStorage.setItem('cart', JSON.stringify(cart));
+                selectedProductForForm = product;
+                selectedSize = null;
 
-                // Update cart count
-                const cartCount = document.querySelector('.cart-count');
-                if (cartCount) {
-                    cartCount.textContent = cart.length;
-                }
-
-                alert('Sản phẩm đã được thêm vào giỏ hàng!');
+                // Render size selection modal
+                const sizeContent = document.getElementById('sizeContent');
+                const sizes = product.sizes || DEFAULT_SIZES;
+                let html = '<p style="margin-bottom: 20px; color: var(--color-secondary);">Vui lòng chọn kích cỡ:</p>';
+                html += '<div class="size-grid">';
+                sizes.forEach(size => {
+                    html += `<button class="size-btn" onclick="selectSize('${size}')">${size}</button>`;
+                });
+                html += '</div>';
+                sizeContent.innerHTML = html;
+                document.getElementById('sizeModal').classList.add('active');
             });
 
             // Wishlist button
@@ -1185,6 +1242,21 @@
             <div class="modal-footer">
                 <div class="order-summary" id="orderSummary"></div>
                 <button class="checkout-btn" onclick="handleCheckout()">THANH TOÁN</button>
+            </div>
+        </div>
+    </div>
+
+    <div id="sizeModal" class="modal">
+        <div class="modal-content" style="max-width: 500px;">
+            <span class="modal-close" onclick="closeSizeModal()">&times;</span>
+            <div class="modal-header">
+                <h2 class="modal-title">Chọn Kích Cỡ</h2>
+            </div>
+            <div class="modal-body">
+                <div id="sizeContent"></div>
+            </div>
+            <div class="modal-footer">
+                <button class="checkout-btn" style="margin-top: 20px; width: 100%;" onclick="confirmSize()">Thêm Vào Giỏ Hàng</button>
             </div>
         </div>
     </div>

@@ -411,6 +411,12 @@
         .checkout-btn:hover { background-color: #333; }
         .modal-empty { text-align: center; padding: 60px 30px; color: var(--color-secondary); }
 
+        /* Size Selection Styles */
+        .size-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 12px; margin: 30px 0; }
+        .size-btn { padding: 15px; border: 2px solid #ddd; background-color: #fff; color: var(--color-primary); cursor: pointer; font-weight: 600; font-size: 1rem; border-radius: 4px; transition: all 0.3s ease; }
+        .size-btn:hover { border-color: var(--color-primary); background-color: #f5f5f5; }
+        .size-btn.selected { border-color: var(--color-primary); background-color: var(--color-primary); color: white; }
+
         /* --- FOOTER --- */
         .footer {
             background-color: var(--color-primary);
@@ -814,6 +820,21 @@
         </div>
     </div>
 
+    <div id="sizeModal" class="modal">
+        <div class="modal-content" style="max-width: 500px;">
+            <span class="modal-close" onclick="closeSizeModal()">&times;</span>
+            <div class="modal-header">
+                <h2 class="modal-title">Chọn Kích Cỡ</h2>
+            </div>
+            <div class="modal-body">
+                <div id="sizeContent"></div>
+            </div>
+            <div class="modal-footer">
+                <button class="checkout-btn" style="margin-top: 20px; width: 100%;" onclick="confirmSize()">Thêm Vào Giỏ Hàng</button>
+            </div>
+        </div>
+    </div>
+
     <script>
         const AUTH_TOKEN_KEY = 'authToken';
 
@@ -824,9 +845,13 @@
                 name: 'Áo Sơ Mi Nam Họa Tiết The Hill Perfect Fit ASS507SAH2',
                 price: 1250000,
                 image: 'https://cdn.hstatic.net/products/200000887901/img_5896.1_79dac8bc14d842148a4a72f3b8a54192.jpg',
-                badge: 'NEW'
+                badge: 'NEW',
+                sizes: ['XS', 'S', 'M', 'L', 'XL', 'XXL']
             }
         ];
+
+        let selectedProduct = null;
+        let selectedSize = null;
 
         function checkAuthStatus() {
             return localStorage.getItem(AUTH_TOKEN_KEY);
@@ -906,6 +931,7 @@
                                     <div class="modal-item-brand">${item.brand || 'ARISTINO'}</div>
                                     <div class="modal-item-name">${item.name}</div>
                                     <div class="modal-item-price">${(item.price || 0).toLocaleString('vi-VN')}₫</div>
+                                    ${item.size ? `<div style="font-size: 0.85rem; color: var(--color-secondary); margin-top: 5px;">Size: ${item.size}</div>` : ''}
                                 </div>
                                 <div class="modal-item-controls">
                                     <div class="quantity-control">
@@ -1092,17 +1118,66 @@
         }
 
         function addToCart(productIndex) {
-            const product = clothingProducts[productIndex];
+            selectedProduct = clothingProducts[productIndex];
+            selectedSize = null;
+
+            // Render size selection modal
+            const sizeContent = document.getElementById('sizeContent');
+            if (selectedProduct.sizes && selectedProduct.sizes.length > 0) {
+                let html = '<p style="margin-bottom: 20px; color: var(--color-secondary);">Vui lòng chọn kích cỡ:</p>';
+                html += '<div class="size-grid">';
+                selectedProduct.sizes.forEach(size => {
+                    html += `<button class="size-btn" onclick="selectSize('${size}')">${size}</button>`;
+                });
+                html += '</div>';
+                sizeContent.innerHTML = html;
+                document.getElementById('sizeModal').classList.add('active');
+            } else {
+                // If no sizes available, add directly
+                confirmSize();
+            }
+        }
+
+        function selectSize(size) {
+            selectedSize = size;
+            const sizeButtons = document.querySelectorAll('.size-btn');
+            sizeButtons.forEach(btn => {
+                if (btn.textContent === size) {
+                    btn.classList.add('selected');
+                } else {
+                    btn.classList.remove('selected');
+                }
+            });
+        }
+
+        function confirmSize() {
+            if (!selectedSize && selectedProduct.sizes && selectedProduct.sizes.length > 0) {
+                alert('Vui lòng chọn kích cỡ!');
+                return;
+            }
+
             let cart = localStorage.getItem('cart') ? JSON.parse(localStorage.getItem('cart')) : [];
-            cart.push(product);
+            const productToAdd = {
+                ...selectedProduct,
+                size: selectedSize,
+                quantity: 1
+            };
+            cart.push(productToAdd);
             localStorage.setItem('cart', JSON.stringify(cart));
 
-            // Update cart count
             const cartCount = document.querySelector('.cart-count');
             if (cartCount) {
                 cartCount.textContent = cart.length;
             }
+
+            closeSizeModal();
             alert('Sản phẩm đã được thêm vào giỏ hàng!');
+        }
+
+        function closeSizeModal() {
+            document.getElementById('sizeModal').classList.remove('active');
+            selectedProduct = null;
+            selectedSize = null;
         }
 
         function addToWishlist(productName) {
