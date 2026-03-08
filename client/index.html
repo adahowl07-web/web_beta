@@ -265,7 +265,13 @@
         .checkout-btn { width: 100%; background-color: var(--color-primary); color: white; padding: 14px; border: none; border-radius: 4px; font-weight: 700; text-transform: uppercase; cursor: pointer; transition: background-color 0.3s ease; font-size: 0.95rem; }
         .checkout-btn:hover { background-color: #333; }
         .modal-empty { text-align: center; padding: 60px 30px; color: var(--color-secondary); }
+        /* Size Selection CSS */
+        .size-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 12px; margin: 30px 0; }
+        .size-btn { padding: 15px; border: 2px solid #ddd; background-color: #fff; color: var(--color-primary); cursor: pointer; font-weight: 600; font-size: 1rem; border-radius: 4px; transition: all 0.3s ease; }
+        .size-btn:hover { border-color: var(--color-primary); background-color: #f5f5f5; }
+        .size-btn.selected { border-color: var(--color-primary); background-color: var(--color-primary); color: white; }
     </style>
+    <link rel="stylesheet" href="cart-drawer.css">
 </head>
 <body>
 
@@ -598,18 +604,19 @@ Our collections blend tradition with modernity, offering you the finest in tailo
     </footer>
 
     <!-- MODALS -->
-    <div id="cartModal" class="modal">
-        <div class="modal-content">
-            <span class="modal-close" onclick="closeCartModal()">&times;</span>
+    <!-- Đã loại bỏ modal giỏ hàng, sử dụng cart.html -->
+
+    <div id="sizeModal" class="modal">
+        <div class="modal-content" style="max-width: 500px;">
+            <span class="modal-close" onclick="closeSizeModal()">&times;</span>
             <div class="modal-header">
-                <h2 class="modal-title">Giỏ Hàng</h2>
+                <h2 class="modal-title">Chọn Kích Cỡ</h2>
             </div>
             <div class="modal-body">
-                <div id="cartItems"></div>
+                <div id="sizeContent"></div>
             </div>
             <div class="modal-footer">
-                <div class="order-summary" id="orderSummary"></div>
-                <button class="checkout-btn" onclick="handleCheckout()">THANH TOÁN</button>
+                <button class="checkout-btn" style="margin-top: 20px; width: 100%;" onclick="confirmSize()">Thêm Vào Giỏ Hàng</button>
             </div>
         </div>
     </div>
@@ -622,8 +629,26 @@ Our collections blend tradition with modernity, offering you the finest in tailo
         </div>
     </div>
 
+    <!-- CART DRAWER -->
+    <div class="cart-drawer-overlay" id="cartDrawerOverlay"></div>
+    <div class="cart-drawer" id="cartDrawer">
+        <div class="cart-drawer-header">
+            <div class="cart-drawer-title">GIỎ HÀNG</div>
+            <button class="cart-drawer-close" onclick="closeCartDrawer()">&times;</button>
+        </div>
+        <div class="cart-drawer-body" id="cartDrawerBody">
+            <!-- Cart items will be rendered here -->
+        </div>
+        <div class="cart-drawer-footer" id="cartDrawerFooter">
+            <!-- Summary and checkout btn will be rendered here -->
+        </div>
+    </div>
+
     <script>
-        const AUTH_TOKEN_KEY = 'authToken'; 
+        const AUTH_TOKEN_KEY = 'authToken';
+        let selectedProduct = null;
+        let selectedSize = null;
+        const DEFAULT_SIZES = ['XS', 'S', 'M', 'L', 'XL', 'XXL'];
 
         function checkAuthStatus() {
             return localStorage.getItem(AUTH_TOKEN_KEY);
@@ -681,115 +706,86 @@ Our collections blend tradition with modernity, offering you the finest in tailo
             const cartCount = localStorage.getItem('cart') ? JSON.parse(localStorage.getItem('cart')).length : 0;
             cartIcon.innerHTML = `<i class="fas fa-shopping-bag"></i><span class="cart-count">${cartCount}</span>`;
             cartIcon.style.cursor = 'pointer';
-            cartIcon.onclick = showCartModal;
+            cartIcon.onclick = openCartDrawer;
             authIconsContainer.appendChild(cartIcon);
         }
 
-        function showCartModal() {
-            const cart = localStorage.getItem('cart') ? JSON.parse(localStorage.getItem('cart')) : [];
-            const cartItemsDiv = document.getElementById('cartItems');
-            const orderSummaryDiv = document.getElementById('orderSummary');
+        function addToCart(productIndex, product) {
+            selectedProduct = product;
+            selectedSize = null;
 
-            if (cart.length === 0) {
-                cartItemsDiv.innerHTML = '<div class="modal-empty">Giỏ hàng trống</div>';
-                orderSummaryDiv.innerHTML = '';
-            } else {
-                let html = '<div class="cart-items-list">';
-                let totalPrice = 0;
-
-                cart.forEach((item, index) => {
-                    const itemTotal = (item.price || 0) * (item.quantity || 1);
-                    totalPrice += itemTotal;
-
-                    html += `
-                        <div class="modal-item">
-                            <div class="modal-item-image" style="background-image: url('${item.image}')"></div>
-                            <div class="modal-item-info">
-                                <div class="modal-item-header">
-                                    <div class="modal-item-brand">${item.brand || 'ARISTINO'}</div>
-                                    <div class="modal-item-name">${item.name}</div>
-                                    <div class="modal-item-price">${(item.price || 0).toLocaleString('vi-VN')}₫</div>
-                                </div>
-                                <div class="modal-item-controls">
-                                    <div class="quantity-control">
-                                        <button onclick="updateQuantity(${index}, -1)">−</button>
-                                        <input type="number" value="${item.quantity || 1}" readonly>
-                                        <button onclick="updateQuantity(${index}, 1)">+</button>
-                                    </div>
-                                    <div class="modal-item-total">${itemTotal.toLocaleString('vi-VN')}₫</div>
-                                    <button class="modal-remove-btn" onclick="removeFromCart(${index})">Xóa</button>
-                                </div>
-                            </div>
-                        </div>
-                    `;
+            // Render size selection modal
+            const sizeContent = document.getElementById('sizeContent');
+            if (selectedProduct.sizes && selectedProduct.sizes.length > 0) {
+                let html = '<p style="margin-bottom: 20px; color: var(--color-secondary);">Vui lòng chọn kích cỡ:</p>';
+                html += '<div class="size-grid">';
+                selectedProduct.sizes.forEach(size => {
+                    html += `<button class="size-btn" onclick="selectSize('${size}')">${size}</button>`;
                 });
-
                 html += '</div>';
-                cartItemsDiv.innerHTML = html;
+                sizeContent.innerHTML = html;
+                document.getElementById('sizeModal').classList.add('active');
+            } else {
+                // If no sizes, add directly to cart
+                let cart = localStorage.getItem('cart') ? JSON.parse(localStorage.getItem('cart')) : [];
+                const productToAdd = {
+                    ...selectedProduct,
+                    quantity: 1
+                };
+                cart.push(productToAdd);
+                localStorage.setItem('cart', JSON.stringify(cart));
 
-                // Render order summary
-                const shippingFee = 30000;
-                const finalTotal = totalPrice + shippingFee;
-
-                orderSummaryDiv.innerHTML = `
-                    <div class="summary-row">
-                        <span class="summary-label">Tạm tính:</span>
-                        <span class="summary-value">${totalPrice.toLocaleString('vi-VN')}₫</span>
-                    </div>
-                    <div class="summary-row">
-                        <span class="summary-label">Phí vận chuyển:</span>
-                        <span class="summary-value">${shippingFee.toLocaleString('vi-VN')}₫</span>
-                    </div>
-                    <div class="summary-row summary-total">
-                        <span class="summary-label">Tổng cộng:</span>
-                        <span class="summary-value">${finalTotal.toLocaleString('vi-VN')}₫</span>
-                    </div>
-                `;
-            }
-
-            document.getElementById('cartModal').classList.add('active');
-        }
-
-        function closeCartModal() {
-            document.getElementById('cartModal').classList.remove('active');
-        }
-
-        function updateQuantity(index, change) {
-            let cart = localStorage.getItem('cart') ? JSON.parse(localStorage.getItem('cart')) : [];
-            if (cart[index]) {
-                const newQuantity = (cart[index].quantity || 1) + change;
-                if (newQuantity > 0) {
-                    cart[index].quantity = newQuantity;
-                    localStorage.setItem('cart', JSON.stringify(cart));
-                    showCartModal();
+                const cartCount = document.querySelector('.cart-count');
+                if (cartCount) {
+                    cartCount.textContent = cart.length;
                 }
+
+                alert('Sản phẩm đã được thêm vào giỏ hàng!');
             }
         }
 
-        function handleCheckout() {
-            const cart = localStorage.getItem('cart') ? JSON.parse(localStorage.getItem('cart')) : [];
-            if (cart.length === 0) {
-                alert('Giỏ hàng trống!');
+        function selectSize(size) {
+            selectedSize = size;
+            const sizeButtons = document.querySelectorAll('.size-btn');
+            sizeButtons.forEach(btn => {
+                if (btn.textContent === size) {
+                    btn.classList.add('selected');
+                } else {
+                    btn.classList.remove('selected');
+                }
+            });
+        }
+
+        function confirmSize() {
+            if (!selectedSize && selectedProduct.sizes && selectedProduct.sizes.length > 0) {
+                alert('Vui lòng chọn kích cỡ!');
                 return;
             }
-            alert('Chức năng thanh toán sẽ được triển khai sớm!');
-            // TODO: Redirect to checkout page
-        }
 
-        function removeFromCart(index) {
             let cart = localStorage.getItem('cart') ? JSON.parse(localStorage.getItem('cart')) : [];
-            cart.splice(index, 1);
+            const productToAdd = {
+                ...selectedProduct,
+                size: selectedSize,
+                quantity: 1
+            };
+            cart.push(productToAdd);
             localStorage.setItem('cart', JSON.stringify(cart));
 
-            // Update UI
             const cartCount = document.querySelector('.cart-count');
             if (cartCount) {
                 cartCount.textContent = cart.length;
             }
 
-            // Refresh modal
-            showCartModal();
+            closeSizeModal();
+            alert('Sản phẩm đã được thêm vào giỏ hàng!');
         }
+
+        function closeSizeModal() {
+            document.getElementById('sizeModal').classList.remove('active');
+            selectedSize = null;
+        }
+
+        // Đã loại bỏ modal giỏ hàng, sử dụng cart.html
 
         function showWishlistModal() {
             const wishlist = localStorage.getItem('wishlist') ? JSON.parse(localStorage.getItem('wishlist')) : [];
@@ -962,5 +958,6 @@ Our collections blend tradition with modernity, offering you the finest in tailo
             });
         });
     </script>
+    <script src="cart-drawer.js"></script>
 </body>
 </html>

@@ -254,6 +254,8 @@
             const cartIcon = document.createElement('div');
             cartIcon.classList.add('cart-icon');
             cartIcon.innerHTML = '<i class="fas fa-shopping-bag"></i><span class="cart-count">0</span>';
+            cartIcon.style.cursor = 'pointer';
+            cartIcon.onclick = function() { window.location.href = 'cart.html'; };
             container.appendChild(cartIcon);
         }
         function renderProducts(items) {
@@ -308,111 +310,7 @@
         });
     </script>
 
-        function showCartModal() {
-            const cart = localStorage.getItem('cart') ? JSON.parse(localStorage.getItem('cart')) : [];
-            const cartItemsDiv = document.getElementById('cartItems');
-            const orderSummaryDiv = document.getElementById('orderSummary');
-
-            if (cart.length === 0) {
-                cartItemsDiv.innerHTML = '<div class="modal-empty">Giỏ hàng trống</div>';
-                orderSummaryDiv.innerHTML = '';
-            } else {
-                let html = '<div class="cart-items-list">';
-                let totalPrice = 0;
-
-                cart.forEach((item, index) => {
-                    const itemTotal = (item.price || 0) * (item.quantity || 1);
-                    totalPrice += itemTotal;
-
-                    html += `
-                        <div class="modal-item">
-                            <div class="modal-item-image" style="background-image: url('${item.image}')"></div>
-                            <div class="modal-item-info">
-                                <div class="modal-item-header">
-                                    <div class="modal-item-brand">${item.brand || 'ARISTINO'}</div>
-                                    <div class="modal-item-name">${item.name}</div>
-                                    <div class="modal-item-price">${(item.price || 0).toLocaleString('vi-VN')}₫</div>
-                                </div>
-                                <div class="modal-item-controls">
-                                    <div class="quantity-control">
-                                        <button onclick="updateQuantity(${index}, -1)">−</button>
-                                        <input type="number" value="${item.quantity || 1}" readonly>
-                                        <button onclick="updateQuantity(${index}, 1)">+</button>
-                                    </div>
-                                    <div class="modal-item-total">${itemTotal.toLocaleString('vi-VN')}₫</div>
-                                    <button class="modal-remove-btn" onclick="removeFromCart(${index})">Xóa</button>
-                                </div>
-                            </div>
-                        </div>
-                    `;
-                });
-
-                html += '</div>';
-                cartItemsDiv.innerHTML = html;
-
-                // Render order summary
-                const shippingFee = 30000;
-                const finalTotal = totalPrice + shippingFee;
-
-                orderSummaryDiv.innerHTML = `
-                    <div class="summary-row">
-                        <span class="summary-label">Tạm tính:</span>
-                        <span class="summary-value">${totalPrice.toLocaleString('vi-VN')}₫</span>
-                    </div>
-                    <div class="summary-row">
-                        <span class="summary-label">Phí vận chuyển:</span>
-                        <span class="summary-value">${shippingFee.toLocaleString('vi-VN')}₫</span>
-                    </div>
-                    <div class="summary-row summary-total">
-                        <span class="summary-label">Tổng cộng:</span>
-                        <span class="summary-value">${finalTotal.toLocaleString('vi-VN')}₫</span>
-                    </div>
-                `;
-            }
-
-            document.getElementById('cartModal').classList.add('active');
-        }
-
-        function closeCartModal() {
-            document.getElementById('cartModal').classList.remove('active');
-        }
-
-        function updateQuantity(index, change) {
-            let cart = localStorage.getItem('cart') ? JSON.parse(localStorage.getItem('cart')) : [];
-            if (cart[index]) {
-                const newQuantity = (cart[index].quantity || 1) + change;
-                if (newQuantity > 0) {
-                    cart[index].quantity = newQuantity;
-                    localStorage.setItem('cart', JSON.stringify(cart));
-                    showCartModal();
-                }
-            }
-        }
-
-        function handleCheckout() {
-            const cart = localStorage.getItem('cart') ? JSON.parse(localStorage.getItem('cart')) : [];
-            if (cart.length === 0) {
-                alert('Giỏ hàng trống!');
-                return;
-            }
-            alert('Chức năng thanh toán sẽ được triển khai sớm!');
-            // TODO: Redirect to checkout page
-        }
-
-        function removeFromCart(index) {
-            let cart = localStorage.getItem('cart') ? JSON.parse(localStorage.getItem('cart')) : [];
-            cart.splice(index, 1);
-            localStorage.setItem('cart', JSON.stringify(cart));
-
-            // Update UI
-            const cartCount = document.querySelector('.cart-count');
-            if (cartCount) {
-                cartCount.textContent = cart.length;
-            }
-
-            // Refresh modal
-            showCartModal();
-        }
+        // Đã loại bỏ toàn bộ modal giỏ hàng và các hàm liên quan, sử dụng cart.html
 
         function showWishlistModal() {
             const wishlist = localStorage.getItem('wishlist') ? JSON.parse(localStorage.getItem('wishlist')) : [];
@@ -467,22 +365,7 @@
         }
 </body>
 
-    <!-- MODALS -->
-    <div id="cartModal" class="modal">
-        <div class="modal-content">
-            <span class="modal-close" onclick="closeCartModal()">&times;</span>
-            <div class="modal-header">
-                <h2 class="modal-title">Giỏ Hàng</h2>
-            </div>
-            <div class="modal-body">
-                <div id="cartItems"></div>
-            </div>
-            <div class="modal-footer">
-                <div class="order-summary" id="orderSummary"></div>
-                <button class="checkout-btn" onclick="handleCheckout()">THANH TOÁN</button>
-            </div>
-        </div>
-    </div>
+    <!-- Đã loại bỏ modal giỏ hàng, sử dụng cart.html -->
 
     <div id="wishlistModal" class="modal">
         <div class="modal-content">

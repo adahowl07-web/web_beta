@@ -78,6 +78,7 @@
         .checkout-btn { width: 100%; background-color: var(--color-primary); color: white; padding: 14px; border: none; border-radius: 4px; font-weight: 700; text-transform: uppercase; cursor: pointer; transition: background-color 0.3s ease; font-size: 0.95rem; }
         .checkout-btn:hover { background-color: #333; }
         .modal-empty { text-align: center; padding: 60px 30px; color: var(--color-secondary); }
+    <link rel="stylesheet" href="cart-drawer.css">
 </head>
 <body>
     <header class="nav-group-wrapper">
@@ -159,6 +160,7 @@
             cartIcon.classList.add('cart-icon');
             cartIcon.innerHTML = '<i class="fas fa-shopping-bag"></i><span class="cart-count">0</span>';
             container.appendChild(cartIcon);
+            cartIcon.onclick = openCartDrawer;
         }
         document.addEventListener('DOMContentLoaded', function() {
             updateAuthUI();
@@ -330,6 +332,22 @@
             // Refresh modal
             showWishlistModal();
         }
+    <!-- CART DRAWER -->
+    <div class="cart-drawer-overlay" id="cartDrawerOverlay"></div>
+    <div class="cart-drawer" id="cartDrawer">
+        <div class="cart-drawer-header">
+            <div class="cart-drawer-title">GIỎ HÀNG</div>
+            <button class="cart-drawer-close" onclick="closeCartDrawer()">&times;</button>
+        </div>
+        <div class="cart-drawer-body" id="cartDrawerBody">
+            <!-- Cart items will be rendered here -->
+        </div>
+        <div class="cart-drawer-footer" id="cartDrawerFooter">
+            <!-- Summary and checkout btn will be rendered here -->
+        </div>
+    </div>
+
+    <script src="cart-drawer.js"></script>
 </body>
 
     <!-- MODALS -->

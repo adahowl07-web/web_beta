@@ -1,0 +1,316 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <title>Thanh toán - Aristino</title>
+    <link rel="stylesheet" href="login.css">
+    <link rel="stylesheet" href="cart-drawer.css">
+    <style>
+        body { background: #fff; font-family: 'Montserrat', Arial, sans-serif; }
+        .checkout-main {
+            display: flex;
+            justify-content: center;
+            align-items: flex-start;
+            gap: 48px;
+            max-width: 1200px;
+            margin: 40px auto 0 auto;
+            padding: 0 24px;
+        }
+        .checkout-left {
+            flex: 2;
+        }
+        .checkout-right {
+            flex: 1;
+            background: #fafbfc;
+            border-radius: 8px;
+            padding: 32px 24px;
+            box-shadow: 0 2px 12px rgba(0,0,0,0.04);
+            min-width: 340px;
+        }
+        .cart-title {
+            font-size: 2rem;
+            font-weight: 700;
+            margin-bottom: 18px;
+        }
+        .cart-summary {
+            font-size: 1.1rem;
+            color: #222;
+            margin-bottom: 18px;
+        }
+        .cart-list {
+            background: #fff;
+            border-radius: 8px;
+            padding: 0;
+            margin: 0;
+            list-style: none;
+        }
+        .cart-item {
+            display: flex;
+            align-items: center;
+            border-bottom: 1px solid #eee;
+            padding: 18px 0;
+        }
+        .cart-item:last-child { border-bottom: none; }
+        .cart-item-img {
+            width: 90px;
+            height: 90px;
+            border-radius: 6px;
+            background-size: cover;
+            background-position: center;
+            margin-right: 18px;
+        }
+        .cart-item-info {
+            flex: 1;
+        }
+        .cart-item-brand {
+            font-size: 1rem;
+            color: #888;
+            font-weight: 600;
+        }
+        .cart-item-name {
+            font-size: 1.1rem;
+            font-weight: 700;
+            margin: 2px 0 6px 0;
+        }
+        .cart-item-variant {
+            font-size: 1rem;
+            color: #444;
+        }
+        .cart-item-price {
+            font-size: 1.1rem;
+            font-weight: 700;
+            color: #222;
+            margin-top: 6px;
+        }
+        .cart-item-controls {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            margin-top: 8px;
+        }
+        .cart-qty-btn {
+            width: 28px;
+            height: 28px;
+            border: 1px solid #222;
+            background: #fff;
+            color: #222;
+            font-size: 1.1rem;
+            border-radius: 2px;
+            cursor: pointer;
+        }
+        .cart-qty-input {
+            width: 36px;
+            text-align: center;
+            border: 1px solid #eee;
+            border-radius: 2px;
+            font-size: 1rem;
+            background: #fafbfc;
+        }
+        .cart-remove-btn {
+            background: none;
+            border: none;
+            color: #888;
+            font-size: 1.2rem;
+            cursor: pointer;
+            margin-left: 8px;
+        }
+        .order-summary-title {
+            font-size: 1.3rem;
+            font-weight: 700;
+            margin-bottom: 18px;
+        }
+        .order-summary-row {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 10px;
+            font-size: 1.1rem;
+        }
+        .order-summary-total {
+            font-weight: 700;
+            font-size: 1.2rem;
+            border-top: 1px solid #eee;
+            padding-top: 10px;
+            margin-top: 10px;
+        }
+        .vat-checkbox {
+            margin-top: 18px;
+            display: flex;
+            align-items: center;
+        }
+        .vat-checkbox input { margin-right: 8px; }
+        .vat-note {
+            font-size: 0.95rem;
+            color: #888;
+            margin-left: 4px;
+        }
+        .checkout-btn {
+            width: 100%;
+            background: #23282d;
+            color: #fff;
+            padding: 16px;
+            border: none;
+            border-radius: 4px;
+            font-weight: 700;
+            text-transform: uppercase;
+            font-size: 1.1rem;
+            margin-top: 24px;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 10px;
+        }
+        .checkout-btn i {
+            font-size: 1.2rem;
+        }
+        .discount-row {
+            display: flex;
+            margin-top: 18px;
+        }
+        .discount-row input {
+            flex: 1;
+            padding: 10px;
+            border: 1px solid #ccc;
+            border-radius: 4px 0 0 4px;
+            font-size: 1rem;
+        }
+        .discount-row button {
+            padding: 10px 18px;
+            background: #23282d;
+            color: #fff;
+            border: none;
+            border-radius: 0 4px 4px 0;
+            font-size: 1rem;
+            cursor: pointer;
+        }
+        @media (max-width: 900px) {
+            .checkout-main { flex-direction: column; gap: 0; }
+            .checkout-right { min-width: unset; margin-top: 32px; }
+        }
+    </style>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+</head>
+<body>
+    <div class="checkout-main">
+        <div class="checkout-left">
+            <div class="cart-title">GIỎ HÀNG CỦA BẠN</div>
+            <div class="cart-summary" id="cart-summary"></div>
+            <ul class="cart-list" id="cart-list"></ul>
+        </div>
+        <div class="checkout-right">
+            <div class="order-summary-title">TÓM TẮT ĐƠN HÀNG</div>
+            <div class="order-summary-row">
+                <span>Tổng tiền hàng</span>
+                <span id="order-subtotal">0₫</span>
+            </div>
+            <div class="order-summary-row">
+                <span>Phí vận chuyển</span>
+                <span id="order-shipping">0₫</span>
+            </div>
+            <div class="order-summary-row order-summary-total">
+                <span>Tổng thanh toán</span>
+                <span id="order-total">0₫</span>
+            </div>
+            <div class="vat-checkbox">
+                <input type="checkbox" id="vat-checkbox">
+                <label for="vat-checkbox"><b>Xuất hóa đơn</b></label>
+            </div>
+            <div class="vat-note">Lưu ý hóa đơn VAT sẽ được gửi trong vòng 24h</div>
+            <button class="checkout-btn" id="checkout-btn">
+                THANH TOÁN <i class="fa-solid fa-arrow-up-right-from-square"></i>
+            </button>
+            <div class="discount-row">
+                <input type="text" placeholder="Nhập mã giảm giá" id="discount-code">
+                <button id="apply-discount">Áp dụng</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- CART DRAWER -->
+    <div class="cart-drawer-overlay" id="cartDrawerOverlay"></div>
+    <div class="cart-drawer" id="cartDrawer">
+        <div class="cart-drawer-header">
+            <div class="cart-drawer-title">GIỎ HÀNG</div>
+            <button class="cart-drawer-close" onclick="closeCartDrawer()">&times;</button>
+        </div>
+        <div class="cart-drawer-body" id="cartDrawerBody">
+            <!-- Cart items will be rendered here -->
+        </div>
+        <div class="cart-drawer-footer" id="cartDrawerFooter">
+            <!-- Summary and checkout btn will be rendered here -->
+        </div>
+    </div>
+
+    <script>
+        function formatCurrency(num) {
+            return num.toLocaleString('vi-VN') + '₫';
+        }
+        function renderCart() {
+            let cart = JSON.parse(localStorage.getItem('cart') || '[]');
+            let cartList = document.getElementById('cart-list');
+            let cartSummary = document.getElementById('cart-summary');
+            let subtotal = 0;
+            cartList.innerHTML = '';
+            if(cart.length === 0) {
+                cartSummary.innerHTML = 'Giỏ hàng trống.';
+                document.getElementById('order-subtotal').textContent = '0₫';
+                document.getElementById('order-total').textContent = '0₫';
+                document.getElementById('checkout-btn').disabled = true;
+                return;
+            }
+            cartSummary.innerHTML = `Tổng cộng (${cart.length} sản phẩm)`;
+            cart.forEach((item, idx) => {
+                let li = document.createElement('li');
+                li.className = 'cart-item';
+                li.innerHTML = `
+                    <div class="cart-item-img" style="background-image:url('${item.image || 'https://placehold.co/90x90'}')"></div>
+                    <div class="cart-item-info">
+                        <div class="cart-item-brand">${item.brand || 'Aristino'}</div>
+                        <div class="cart-item-name">${item.name}</div>
+                        <div class="cart-item-variant">${item.color || ''} ${item.size ? ' | ' + item.size : ''}</div>
+                        <div class="cart-item-price">${formatCurrency(item.price)}</div>
+                        <div class="cart-item-controls">
+                            <button class="cart-qty-btn" onclick="updateQty(${idx}, -1)">-</button>
+                            <input class="cart-qty-input" type="text" value="${item.quantity || 1}" readonly>
+                            <button class="cart-qty-btn" onclick="updateQty(${idx}, 1)">+</button>
+                            <button class="cart-remove-btn" onclick="removeItem(${idx})"><i class="fa fa-trash"></i></button>
+                        </div>
+                    </div>
+                `;
+                cartList.appendChild(li);
+                subtotal += (item.price || 0) * (item.quantity || 1);
+            });
+            document.getElementById('order-subtotal').textContent = formatCurrency(subtotal);
+            document.getElementById('order-shipping').textContent = '0₫';
+            document.getElementById('order-total').textContent = formatCurrency(subtotal);
+            document.getElementById('checkout-btn').disabled = false;
+        }
+        function updateQty(idx, change) {
+            let cart = JSON.parse(localStorage.getItem('cart') || '[]');
+            if(cart[idx]) {
+                let newQty = (cart[idx].quantity || 1) + change;
+                if(newQty > 0) {
+                    cart[idx].quantity = newQty;
+                    localStorage.setItem('cart', JSON.stringify(cart));
+                    renderCart();
+                }
+            }
+        }
+        function removeItem(idx) {
+            let cart = JSON.parse(localStorage.getItem('cart') || '[]');
+            cart.splice(idx, 1);
+            localStorage.setItem('cart', JSON.stringify(cart));
+            renderCart();
+        }
+        document.getElementById('checkout-btn').onclick = function() {
+            if(JSON.parse(localStorage.getItem('cart') || '[]').length === 0) return;
+            alert('Chức năng thanh toán sẽ được cập nhật sớm!');
+        };
+        document.getElementById('apply-discount').onclick = function() {
+            alert('Mã giảm giá chỉ demo giao diện!');
+        };
+        renderCart();
+    </script>
+    <script src="cart-drawer.js"></script>
+</body>
+</html>

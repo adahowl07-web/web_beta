@@ -522,7 +522,311 @@
             .footer-top { grid-template-columns: 1fr; }
             .footer-bottom { flex-direction: column; gap: 10px; text-align: center; }
         }
+
+        /* --- CART DRAWER STYLES --- */
+        .cart-drawer-overlay {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0, 0, 0, 0.5);
+            z-index: 300;
+            opacity: 0;
+            transition: opacity 0.3s ease;
+        }
+        .cart-drawer-overlay.active {
+            display: block;
+            opacity: 1;
+        }
+
+        .cart-drawer {
+            position: fixed;
+            top: 0;
+            right: 0;
+            width: 450px;
+            height: 100vh;
+            background-color: #ffffff;
+            z-index: 301;
+            transform: translateX(100%);
+            transition: transform 0.3s ease;
+            display: flex;
+            flex-direction: column;
+            box-shadow: -2px 0 12px rgba(0, 0, 0, 0.15);
+        }
+        .cart-drawer.active {
+            transform: translateX(0);
+        }
+
+        .cart-drawer-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 20px 24px;
+            border-bottom: 1px solid #f0f0f0;
+            background-color: #fff;
+        }
+        .cart-drawer-title {
+            font-size: 1.4rem;
+            font-weight: 700;
+            color: #000;
+        }
+        .cart-drawer-close {
+            background: none;
+            border: none;
+            font-size: 1.5rem;
+            cursor: pointer;
+            color: #999;
+            transition: color 0.3s ease;
+        }
+        .cart-drawer-close:hover {
+            color: #000;
+        }
+
+        .cart-drawer-body {
+            flex: 1;
+            overflow-y: auto;
+            padding: 24px;
+            background-color: #fff;
+        }
+        .cart-drawer-body::-webkit-scrollbar {
+            width: 6px;
+        }
+        .cart-drawer-body::-webkit-scrollbar-track {
+            background: #f1f1f1;
+        }
+        .cart-drawer-body::-webkit-scrollbar-thumb {
+            background: #888;
+            border-radius: 3px;
+        }
+
+        .cart-drawer-item {
+            display: flex;
+            gap: 16px;
+            margin-bottom: 24px;
+            padding-bottom: 24px;
+            border-bottom: 1px solid #f0f0f0;
+        }
+        .cart-drawer-item:last-child {
+            border-bottom: none;
+        }
+        .cart-drawer-item-image {
+            width: 100px;
+            height: 100px;
+            background-size: cover;
+            background-position: center;
+            border-radius: 6px;
+            flex-shrink: 0;
+        }
+        .cart-drawer-item-info {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+        }
+        .cart-drawer-item-brand {
+            font-size: 0.75rem;
+            color: #999;
+            text-transform: uppercase;
+            font-weight: 700;
+            margin-bottom: 4px;
+        }
+        .cart-drawer-item-name {
+            font-size: 0.95rem;
+            font-weight: 600;
+            color: #000;
+            line-height: 1.3;
+            margin-bottom: 8px;
+            min-height: 32px;
+        }
+        .cart-drawer-item-variant {
+            font-size: 0.85rem;
+            color: #666;
+            margin-bottom: 8px;
+        }
+        .cart-drawer-item-price {
+            font-size: 1rem;
+            font-weight: 700;
+            color: #000;
+            margin-bottom: 8px;
+        }
+        .cart-drawer-item-controls {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            margin-top: auto;
+        }
+        .cart-qty-control {
+            display: flex;
+            align-items: center;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+        }
+        .cart-qty-btn {
+            background: none;
+            border: none;
+            padding: 6px 10px;
+            cursor: pointer;
+            font-size: 1rem;
+            color: #000;
+            font-weight: 600;
+            transition: background-color 0.2s ease;
+        }
+        .cart-qty-btn:hover {
+            background-color: #f5f5f5;
+        }
+        .cart-qty-input {
+            width: 40px;
+            border: none;
+            text-align: center;
+            font-weight: 600;
+            padding: 6px 0;
+        }
+        .cart-drawer-item-remove {
+            background: none;
+            border: none;
+            color: #999;
+            font-size: 1.1rem;
+            cursor: pointer;
+            transition: color 0.3s ease;
+            padding: 0;
+            line-height: 1;
+        }
+        .cart-drawer-item-remove:hover {
+            color: #b80d0d;
+        }
+
+        .cart-drawer-empty {
+            text-align: center;
+            padding: 60px 20px;
+            color: #999;
+        }
+        .cart-drawer-empty-icon {
+            font-size: 3rem;
+            margin-bottom: 16px;
+            color: #ddd;
+        }
+        .cart-drawer-empty-text {
+            font-size: 1rem;
+            color: #999;
+        }
+
+        .cart-drawer-footer {
+            padding: 24px;
+            border-top: 1px solid #f0f0f0;
+            background-color: #f9f9f9;
+        }
+        .cart-drawer-summary {
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+            margin-bottom: 20px;
+        }
+        .cart-drawer-summary-row {
+            display: flex;
+            justify-content: space-between;
+            font-size: 0.95rem;
+        }
+        .cart-drawer-summary-label {
+            color: #666;
+        }
+        .cart-drawer-summary-value {
+            font-weight: 600;
+            color: #000;
+        }
+        .cart-drawer-summary-total {
+            display: flex;
+            justify-content: space-between;
+            border-top: 1px solid #ddd;
+            padding-top: 12px;
+            font-size: 1.1rem;
+            font-weight: 700;
+        }
+        .cart-drawer-summary-total .cart-drawer-summary-value {
+            color: #b80d0d;
+            font-size: 1.1rem;
+        }
+        .cart-drawer-checkout-btn {
+            width: 100%;
+            background-color: #000;
+            color: #fff;
+            padding: 14px;
+            border: none;
+            border-radius: 4px;
+            font-weight: 700;
+            text-transform: uppercase;
+            cursor: pointer;
+            font-size: 0.95rem;
+            transition: background-color 0.3s ease;
+            margin-top: 16px;
+        }
+        .cart-drawer-checkout-btn:hover {
+            background-color: #333;
+        }
+
+        /* Size Popover Styles */
+        .size-popover {
+            display: none;
+            position: fixed;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            z-index: 400;
+            background: rgba(0, 0, 0, 0.3);
+            width: 100%;
+            height: 100%;
+        }
+        .size-popover.active {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        .size-popover-content {
+            background: white;
+            border-radius: 8px;
+            padding: 20px;
+            width: 95%;
+            max-width: 320px;
+            box-shadow: 0 4px 16px rgba(0, 0, 0, 0.15);
+            position: relative;
+        }
+        .size-popover-close {
+            position: absolute;
+            top: 12px;
+            right: 12px;
+            background: none;
+            border: none;
+            font-size: 1.5rem;
+            cursor: pointer;
+            color: #999;
+            transition: color 0.3s ease;
+        }
+        .size-popover-close:hover {
+            color: #000;
+        }
+        .qty-btn-mini {
+            width: 32px;
+            height: 32px;
+            border: 1px solid #ddd;
+            background: #fff;
+            cursor: pointer;
+            border-radius: 4px;
+            font-weight: 600;
+            transition: all 0.3s ease;
+        }
+        .qty-btn-mini:hover {
+            border-color: #000;
+            background: #f5f5f5;
+        }
+
+        @media (max-width: 768px) {
+            .cart-drawer {
+                width: 100%;
+                max-width: 450px;
+            }
+        }
     </style>
+    <link rel="stylesheet" href="cart-drawer.css">
 </head>
 <body>
 
@@ -796,19 +1100,20 @@
     </footer>
 
     <!-- MODALS -->
-    <div id="cartModal" class="modal">
-        <div class="modal-content">
-            <span class="modal-close" onclick="closeCartModal()">&times;</span>
-            <div class="modal-header">
-                <h2 class="modal-title">Giỏ Hàng</h2>
-            </div>
-            <div class="modal-body">
-                <div id="cartItems"></div>
-            </div>
-            <div class="modal-footer">
-                <div class="order-summary" id="orderSummary"></div>
-                <button class="checkout-btn" onclick="handleCheckout()">THANH TOÁN</button>
-            </div>
+    <!-- Đã loại bỏ modal giỏ hàng, sử dụng cart.html -->
+
+    <!-- CART DRAWER -->
+    <div class="cart-drawer-overlay" id="cartDrawerOverlay"></div>
+    <div class="cart-drawer" id="cartDrawer">
+        <div class="cart-drawer-header">
+            <div class="cart-drawer-title">GIỎ HÀNG</div>
+            <button class="cart-drawer-close" onclick="closeCartDrawer()">&times;</button>
+        </div>
+        <div class="cart-drawer-body" id="cartDrawerBody">
+            <!-- Cart items will be rendered here -->
+        </div>
+        <div class="cart-drawer-footer" id="cartDrawerFooter">
+            <!-- Summary and checkout btn will be rendered here -->
         </div>
     </div>
 
@@ -820,18 +1125,23 @@
         </div>
     </div>
 
-    <div id="sizeModal" class="modal">
-        <div class="modal-content" style="max-width: 500px;">
-            <span class="modal-close" onclick="closeSizeModal()">&times;</span>
-            <div class="modal-header">
-                <h2 class="modal-title">Chọn Kích Cỡ</h2>
+    <!-- Size Popover - Nhỏ gọn, floating -->
+    <div id="sizePopover" class="size-popover">
+        <div class="size-popover-content">
+            <button class="size-popover-close" onclick="closeSizePopover()">&times;</button>
+            <label for="sizeSelect" style="display: block; margin-bottom: 8px; font-weight: 600; font-size: 0.9rem;">Chọn kích cỡ:</label>
+            <select id="sizeSelect" style="width: 100%; padding: 8px; border: 1px solid #ddd; border-radius: 4px; font-size: 0.9rem; margin-bottom: 10px;">
+                <option value="">-- Chọn --</option>
+            </select>
+
+            <label style="display: block; margin-bottom: 8px; font-weight: 600; font-size: 0.9rem;">Số lượng:</label>
+            <div style="display: flex; align-items: center; gap: 8px; margin-bottom: 12px;">
+                <button class="qty-btn-mini" onclick="decreaseQty()">−</button>
+                <input type="number" id="qtyInput" value="1" readonly style="width: 40px; text-align: center; border: 1px solid #ddd; padding: 4px;">
+                <button class="qty-btn-mini" onclick="increaseQty()">+</button>
             </div>
-            <div class="modal-body">
-                <div id="sizeContent"></div>
-            </div>
-            <div class="modal-footer">
-                <button class="checkout-btn" style="margin-top: 20px; width: 100%;" onclick="confirmSize()">Thêm Vào Giỏ Hàng</button>
-            </div>
+
+            <button onclick="confirmAddToCart()" style="width: 100%; padding: 10px; background: #000; color: #fff; border: none; border-radius: 4px; font-weight: 600; cursor: pointer;">Thêm Vào Giỏ</button>
         </div>
     </div>
 
@@ -846,12 +1156,12 @@
                 price: 1250000,
                 image: 'https://cdn.hstatic.net/products/200000887901/img_5896.1_79dac8bc14d842148a4a72f3b8a54192.jpg',
                 badge: 'NEW',
-                sizes: ['XS', 'S', 'M', 'L', 'XL', 'XXL']
+                sizes: ['38', '39', '40', '41', '42', '43']
             }
         ];
 
         let selectedProduct = null;
-        let selectedSize = null;
+        let editingIndex = null;
 
         function checkAuthStatus() {
             return localStorage.getItem(AUTH_TOKEN_KEY);
@@ -903,105 +1213,9 @@
             const cartCount = localStorage.getItem('cart') ? JSON.parse(localStorage.getItem('cart')).length : 0;
             cartIcon.innerHTML = `<i class="fas fa-shopping-bag"></i><span class="cart-count">${cartCount}</span>`;
             cartIcon.style.cursor = 'pointer';
-            cartIcon.onclick = showCartModal;
+            cartIcon.onclick = function() { openCartDrawer(); };
+            // Đã loại bỏ modal giỏ hàng, sử dụng cart.html
             authIconsContainer.appendChild(cartIcon);
-        }
-
-        function showCartModal() {
-            const cart = localStorage.getItem('cart') ? JSON.parse(localStorage.getItem('cart')) : [];
-            const cartItemsDiv = document.getElementById('cartItems');
-            const orderSummaryDiv = document.getElementById('orderSummary');
-
-            if (cart.length === 0) {
-                cartItemsDiv.innerHTML = '<div class="modal-empty">Giỏ hàng trống</div>';
-                orderSummaryDiv.innerHTML = '';
-            } else {
-                let html = '<div class="cart-items-list">';
-                let totalPrice = 0;
-
-                cart.forEach((item, index) => {
-                    const itemTotal = (item.price || 0) * (item.quantity || 1);
-                    totalPrice += itemTotal;
-
-                    html += `
-                        <div class="modal-item">
-                            <div class="modal-item-image" style="background-image: url('${item.image}')"></div>
-                            <div class="modal-item-info">
-                                <div class="modal-item-header">
-                                    <div class="modal-item-brand">${item.brand || 'ARISTINO'}</div>
-                                    <div class="modal-item-name">${item.name}</div>
-                                    <div class="modal-item-price">${(item.price || 0).toLocaleString('vi-VN')}₫</div>
-                                    ${item.size ? `<div style="font-size: 0.85rem; color: var(--color-secondary); margin-top: 5px;">Size: ${item.size}</div>` : ''}
-                                </div>
-                                <div class="modal-item-controls">
-                                    <div class="quantity-control">
-                                        <button onclick="updateQuantity(${index}, -1)">−</button>
-                                        <input type="number" value="${item.quantity || 1}" readonly>
-                                        <button onclick="updateQuantity(${index}, 1)">+</button>
-                                    </div>
-                                    <div class="modal-item-total">${itemTotal.toLocaleString('vi-VN')}₫</div>
-                                    <button class="modal-remove-btn" onclick="removeFromCart(${index})">Xóa</button>
-                                </div>
-                            </div>
-                        </div>
-                    `;
-                });
-
-                html += '</div>';
-                cartItemsDiv.innerHTML = html;
-
-                // Render order summary
-                const shippingFee = 30000;
-                const finalTotal = totalPrice + shippingFee;
-
-                orderSummaryDiv.innerHTML = `
-                    <div class="summary-row">
-                        <span class="summary-label">Tạm tính:</span>
-                        <span class="summary-value">${totalPrice.toLocaleString('vi-VN')}₫</span>
-                    </div>
-                    <div class="summary-row">
-                        <span class="summary-label">Phí vận chuyển:</span>
-                        <span class="summary-value">${shippingFee.toLocaleString('vi-VN')}₫</span>
-                    </div>
-                    <div class="summary-row summary-total">
-                        <span class="summary-label">Tổng cộng:</span>
-                        <span class="summary-value">${finalTotal.toLocaleString('vi-VN')}₫</span>
-                    </div>
-                `;
-            }
-
-            document.getElementById('cartModal').classList.add('active');
-        }
-
-        function closeCartModal() {
-            document.getElementById('cartModal').classList.remove('active');
-        }
-
-        function removeFromCart(index) {
-            let cart = localStorage.getItem('cart') ? JSON.parse(localStorage.getItem('cart')) : [];
-            cart.splice(index, 1);
-            localStorage.setItem('cart', JSON.stringify(cart));
-
-            // Update UI
-            const cartCount = document.querySelector('.cart-count');
-            if (cartCount) {
-                cartCount.textContent = cart.length;
-            }
-
-            // Refresh modal
-            showCartModal();
-        }
-
-        function updateQuantity(index, change) {
-            let cart = localStorage.getItem('cart') ? JSON.parse(localStorage.getItem('cart')) : [];
-            if (cart[index]) {
-                const newQuantity = (cart[index].quantity || 1) + change;
-                if (newQuantity > 0) {
-                    cart[index].quantity = newQuantity;
-                    localStorage.setItem('cart', JSON.stringify(cart));
-                    showCartModal();
-                }
-            }
         }
 
         function handleCheckout() {
@@ -1108,8 +1322,12 @@
                 `;
 
                 card.addEventListener('click', function() {
-                    // Save selected product to localStorage
-                    localStorage.setItem('selectedProduct', JSON.stringify(product));
+                    // Save selected product to localStorage, ép size về số
+                    const productToSave = {
+                        ...product,
+                        sizes: ['38', '39', '40', '41', '42', '43']
+                    };
+                    localStorage.setItem('selectedProduct', JSON.stringify(productToSave));
                     window.location.href = 'product-detail.html';
                 });
 
@@ -1119,50 +1337,69 @@
 
         function addToCart(productIndex) {
             selectedProduct = clothingProducts[productIndex];
-            selectedSize = null;
+            editingIndex = null;
 
-            // Render size selection modal
-            const sizeContent = document.getElementById('sizeContent');
+            // Render size selection dropdown in popover
+            const sizeSelect = document.getElementById('sizeSelect');
             if (selectedProduct.sizes && selectedProduct.sizes.length > 0) {
-                let html = '<p style="margin-bottom: 20px; color: var(--color-secondary);">Vui lòng chọn kích cỡ:</p>';
-                html += '<div class="size-grid">';
+                sizeSelect.innerHTML = '<option value="">-- Chọn --</option>';
                 selectedProduct.sizes.forEach(size => {
-                    html += `<button class="size-btn" onclick="selectSize('${size}')">${size}</button>`;
+                    sizeSelect.innerHTML += `<option value="${size}">${size}</option>`;
                 });
-                html += '</div>';
-                sizeContent.innerHTML = html;
-                document.getElementById('sizeModal').classList.add('active');
-            } else {
-                // If no sizes available, add directly
-                confirmSize();
+                sizeSelect.value = '';
+            }
+
+            // Reset quantity
+            document.getElementById('qtyInput').value = 1;
+
+            // Open popover
+            document.getElementById('sizePopover').classList.add('active');
+        }
+
+        function onSizeSelected() {
+            // Optional: validate size is selected
+            const sizeValue = document.getElementById('sizeSelect').value;
+            return sizeValue !== '';
+        }
+
+        function increaseQty() {
+            const qtyInput = document.getElementById('qtyInput');
+            qtyInput.value = (parseInt(qtyInput.value) || 1) + 1;
+        }
+
+        function decreaseQty() {
+            const qtyInput = document.getElementById('qtyInput');
+            const currentQty = parseInt(qtyInput.value) || 1;
+            if (currentQty > 1) {
+                qtyInput.value = currentQty - 1;
             }
         }
 
-        function selectSize(size) {
-            selectedSize = size;
-            const sizeButtons = document.querySelectorAll('.size-btn');
-            sizeButtons.forEach(btn => {
-                if (btn.textContent === size) {
-                    btn.classList.add('selected');
-                } else {
-                    btn.classList.remove('selected');
-                }
-            });
-        }
+        function confirmAddToCart() {
+            const sizeValue = document.getElementById('sizeSelect').value;
+            const qty = parseInt(document.getElementById('qtyInput').value) || 1;
 
-        function confirmSize() {
-            if (!selectedSize && selectedProduct.sizes && selectedProduct.sizes.length > 0) {
+            if (!sizeValue && selectedProduct.sizes && selectedProduct.sizes.length > 0) {
                 alert('Vui lòng chọn kích cỡ!');
                 return;
             }
 
             let cart = localStorage.getItem('cart') ? JSON.parse(localStorage.getItem('cart')) : [];
-            const productToAdd = {
-                ...selectedProduct,
-                size: selectedSize,
-                quantity: 1
-            };
-            cart.push(productToAdd);
+
+            if (editingIndex !== null) {
+                // Update existing item
+                cart[editingIndex].size = sizeValue;
+                cart[editingIndex].quantity = qty;
+            } else {
+                // Add new item
+                const productToAdd = {
+                    ...selectedProduct,
+                    size: sizeValue,
+                    quantity: qty
+                };
+                cart.push(productToAdd);
+            }
+
             localStorage.setItem('cart', JSON.stringify(cart));
 
             const cartCount = document.querySelector('.cart-count');
@@ -1170,14 +1407,47 @@
                 cartCount.textContent = cart.length;
             }
 
-            closeSizeModal();
-            alert('Sản phẩm đã được thêm vào giỏ hàng!');
+            closeSizePopover();
+            updateCartDrawer();
+            if (editingIndex !== null) {
+                alert('Kích cỡ đã được cập nhật!');
+                editingIndex = null;
+            } else {
+                alert('Sản phẩm đã được thêm vào giỏ hàng!');
+            }
         }
 
-        function closeSizeModal() {
-            document.getElementById('sizeModal').classList.remove('active');
+        function closeSizePopover() {
+            document.getElementById('sizePopover').classList.remove('active');
             selectedProduct = null;
-            selectedSize = null;
+            editingIndex = null;
+        }
+
+
+        function editCartItemSize(index) {
+            let cart = localStorage.getItem('cart') ? JSON.parse(localStorage.getItem('cart')) : [];
+            if (!cart[index]) return;
+
+            const item = cart[index];
+            selectedProduct = item;
+            editingIndex = index;
+
+            // Render size selection dropdown in popover
+            const sizeSelect = document.getElementById('sizeSelect');
+            if (selectedProduct.sizes && selectedProduct.sizes.length > 0) {
+                sizeSelect.innerHTML = '<option value="">-- Chọn --</option>';
+                selectedProduct.sizes.forEach(size => {
+                    sizeSelect.innerHTML += `<option value="${size}">${size}</option>`;
+                });
+                sizeSelect.value = item.size;
+            }
+
+            // Set quantity
+            document.getElementById('qtyInput').value = item.quantity || 1;
+
+            // Open popover
+            document.getElementById('sizePopover').classList.add('active');
+            closeCartDrawer();
         }
 
         function addToWishlist(productName) {
@@ -1262,7 +1532,8 @@
                 lastScrollY = currentScrollY;
             });
         });
-    </script>
 
+    </script>
+    <script src="cart-drawer.js"></script>
 </body>
 </html>
