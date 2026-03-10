@@ -11,21 +11,22 @@
             display: flex;
             justify-content: center;
             align-items: flex-start;
-            gap: 48px;
-            max-width: 1200px;
-            margin: 40px auto 0 auto;
-            padding: 0 24px;
+            gap: 32px;
+            max-width: 100%;
+            margin: 40px 0 0 0;
+            padding: 0 40px;
         }
         .checkout-left {
-            flex: 2;
+            flex: 1.5;
+            min-width: 400px;
         }
         .checkout-right {
             flex: 1;
             background: #fafbfc;
             border-radius: 8px;
-            padding: 32px 24px;
+            padding: 32px 28px;
             box-shadow: 0 2px 12px rgba(0,0,0,0.04);
-            min-width: 340px;
+            min-width: 320px;
         }
         .cart-title {
             font-size: 2rem;
@@ -115,33 +116,51 @@
             margin-left: 8px;
         }
         .order-summary-title {
-            font-size: 1.3rem;
+            font-size: 1.15rem;
             font-weight: 700;
             margin-bottom: 18px;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
         }
         .order-summary-row {
             display: flex;
             justify-content: space-between;
-            margin-bottom: 10px;
-            font-size: 1.1rem;
+            margin-bottom: 12px;
+            font-size: 0.95rem;
+            padding: 6px 0;
         }
         .order-summary-total {
             font-weight: 700;
-            font-size: 1.2rem;
-            border-top: 1px solid #eee;
-            padding-top: 10px;
-            margin-top: 10px;
+            font-size: 1.1rem;
+            border-top: 2px solid #eee;
+            padding: 12px 0;
+            margin-top: 6px;
+            margin-bottom: 18px;
         }
         .vat-checkbox {
-            margin-top: 18px;
+            margin-top: 10px;
+            margin-bottom: 8px;
             display: flex;
             align-items: center;
-        }
-        .vat-checkbox input { margin-right: 8px; }
-        .vat-note {
             font-size: 0.95rem;
+        }
+        .vat-checkbox input {
+            margin-right: 8px;
+            width: 16px;
+            height: 16px;
+            cursor: pointer;
+        }
+        .vat-checkbox label {
+            cursor: pointer;
+            font-weight: 500;
+            font-style: italic;
+        }
+        .vat-note {
+            font-size: 0.85rem;
             color: #888;
-            margin-left: 4px;
+            margin-left: 0;
+            margin-bottom: 16px;
+            line-height: 1.3;
         }
         .checkout-btn {
             width: 100%;
@@ -152,40 +171,279 @@
             border-radius: 4px;
             font-weight: 700;
             text-transform: uppercase;
-            font-size: 1.1rem;
-            margin-top: 24px;
+            font-size: 1rem;
+            margin-bottom: 14px;
             cursor: pointer;
             display: flex;
             align-items: center;
             justify-content: center;
             gap: 10px;
+            letter-spacing: 0.5px;
+            transition: background 0.3s ease;
+        }
+        .checkout-btn:hover {
+            background: #1a1d20;
         }
         .checkout-btn i {
-            font-size: 1.2rem;
+            font-size: 1rem;
         }
         .discount-row {
             display: flex;
-            margin-top: 18px;
+            margin-top: 0;
+            gap: 0;
         }
         .discount-row input {
             flex: 1;
-            padding: 10px;
+            padding: 11px 12px;
             border: 1px solid #ccc;
             border-radius: 4px 0 0 4px;
-            font-size: 1rem;
+            font-size: 0.9rem;
+            background: #f9f9f9;
+        }
+        .discount-row input::placeholder {
+            color: #999;
         }
         .discount-row button {
-            padding: 10px 18px;
+            padding: 11px 16px;
             background: #23282d;
             color: #fff;
             border: none;
             border-radius: 0 4px 4px 0;
-            font-size: 1rem;
+            font-size: 0.9rem;
+            font-weight: 600;
             cursor: pointer;
+            transition: background 0.3s ease;
+            text-transform: uppercase;
+            letter-spacing: 0.3px;
+        }
+        .discount-row button:hover {
+            background: #1a1d20;
+        }
+        .select-all-section {
+            padding: 12px 0;
+            margin-bottom: 18px;
+            border-bottom: 1px solid #eee;
+        }
+        .select-all-checkbox {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            cursor: pointer;
+            font-weight: 600;
+            font-size: 0.95rem;
+        }
+        .select-all-checkbox input[type="checkbox"] {
+            width: 18px;
+            height: 18px;
+            cursor: pointer;
+            accent-color: #23282d;
+        }
+        .checkbox-label {
+            cursor: pointer;
+            user-select: none;
+        }
+        .cart-item-checkbox {
+            display: flex;
+            align-items: center;
+            margin-right: 12px;
+        }
+        .cart-item-checkbox input[type="checkbox"] {
+            width: 18px;
+            height: 18px;
+            cursor: pointer;
+            accent-color: #23282d;
+        }
+        .cart-item {
+            transition: opacity 0.3s ease;
+        }
+        .cart-item.selected {
+            opacity: 1;
+        }
+        .cart-item:not(.selected) {
+            opacity: 0.6;
+        }
+        .cart-item-img {
+            position: relative;
+        }
+        .discount-badge {
+            position: absolute;
+            top: 8px;
+            right: 8px;
+            background-color: #b80d0d;
+            color: #ffffff;
+            padding: 4px 8px;
+            border-radius: 4px;
+            font-size: 0.75rem;
+            font-weight: 700;
+            text-transform: uppercase;
+            z-index: 5;
+        }
+        /* PAYMENT MODAL */
+        .payment-modal-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.5);
+            display: none;
+            align-items: center;
+            justify-content: center;
+            z-index: 1000;
+        }
+        .payment-modal-overlay.active {
+            display: flex;
+        }
+        .payment-modal {
+            background: #fff;
+            border-radius: 8px;
+            width: 90%;
+            max-width: 600px;
+            max-height: 90vh;
+            overflow-y: auto;
+            box-shadow: 0 10px 40px rgba(0, 0, 0, 0.15);
+        }
+        .payment-modal-header {
+            padding: 24px;
+            border-bottom: 1px solid #eee;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        .payment-modal-title {
+            font-size: 1.5rem;
+            font-weight: 700;
+        }
+        .payment-modal-close {
+            background: none;
+            border: none;
+            font-size: 1.5rem;
+            cursor: pointer;
+            color: #888;
+        }
+        .payment-modal-body {
+            padding: 32px 24px;
+        }
+        .form-group {
+            margin-bottom: 20px;
+        }
+        .form-label {
+            display: block;
+            font-weight: 600;
+            margin-bottom: 8px;
+            font-size: 0.95rem;
+        }
+        .form-input, .form-select {
+            width: 100%;
+            padding: 12px;
+            border: 1px solid #ccc;
+            border-radius: 4px;
+            font-size: 1rem;
+            font-family: inherit;
+            box-sizing: border-box;
+        }
+        .form-input:focus, .form-select:focus {
+            outline: none;
+            border-color: #23282d;
+            box-shadow: 0 0 0 3px rgba(35, 40, 45, 0.1);
+        }
+        .form-row {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 16px;
+        }
+        .form-row.full {
+            grid-template-columns: 1fr;
+        }
+        .payment-methods {
+            margin: 28px 0;
+            padding-top: 28px;
+            border-top: 2px solid #eee;
+        }
+        .payment-methods-title {
+            font-weight: 700;
+            font-size: 1.1rem;
+            margin-bottom: 16px;
+        }
+        .payment-method-options {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 16px;
+        }
+        .payment-method-card {
+            border: 2px solid #eee;
+            border-radius: 8px;
+            padding: 16px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            text-align: center;
+        }
+        .payment-method-card:hover {
+            border-color: #23282d;
+            background: #fafbfc;
+        }
+        .payment-method-card.active {
+            border-color: #23282d;
+            background: #f0f0f0;
+        }
+        .payment-method-icon {
+            font-size: 2rem;
+            margin-bottom: 8px;
+        }
+        .payment-method-name {
+            font-weight: 700;
+            font-size: 1rem;
+        }
+        .payment-method-desc {
+            font-size: 0.85rem;
+            color: #888;
+            margin-top: 4px;
+        }
+        .payment-modal-footer {
+            padding: 24px;
+            border-top: 1px solid #eee;
+            display: flex;
+            gap: 12px;
+            justify-content: flex-end;
+        }
+        .btn-cancel, .btn-confirm {
+            padding: 12px 32px;
+            border: none;
+            border-radius: 4px;
+            font-weight: 600;
+            cursor: pointer;
+            text-transform: uppercase;
+            font-size: 0.9rem;
+            transition: all 0.3s ease;
+        }
+        .btn-cancel {
+            background: #eee;
+            color: #222;
+        }
+        .btn-cancel:hover {
+            background: #ddd;
+        }
+        .btn-confirm {
+            background: #23282d;
+            color: #fff;
+        }
+        .btn-confirm:hover {
+            background: #1a1d20;
+        }
+        .form-error {
+            color: #d32f2f;
+            font-size: 0.85rem;
+            margin-top: 6px;
         }
         @media (max-width: 900px) {
             .checkout-main { flex-direction: column; gap: 0; }
             .checkout-right { min-width: unset; margin-top: 32px; }
+            .form-row {
+                grid-template-columns: 1fr;
+            }
+            .payment-method-options {
+                grid-template-columns: 1fr;
+            }
         }
     </style>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
@@ -195,6 +453,12 @@
         <div class="checkout-left">
             <div class="cart-title">GIỎ HÀNG CỦA BẠN</div>
             <div class="cart-summary" id="cart-summary"></div>
+            <div class="select-all-section">
+                <label class="select-all-checkbox">
+                    <input type="checkbox" id="select-all-checkbox" checked>
+                    <span class="checkbox-label">CHỌN TẤT CẢ</span>
+                </label>
+            </div>
             <ul class="cart-list" id="cart-list"></ul>
         </div>
         <div class="checkout-right">
@@ -213,7 +477,7 @@
             </div>
             <div class="vat-checkbox">
                 <input type="checkbox" id="vat-checkbox">
-                <label for="vat-checkbox"><b>Xuất hóa đơn</b></label>
+                <label for="vat-checkbox">Xuất hóa đơn</label>
             </div>
             <div class="vat-note">Lưu ý hóa đơn VAT sẽ được gửi trong vòng 24h</div>
             <button class="checkout-btn" id="checkout-btn">
@@ -222,6 +486,86 @@
             <div class="discount-row">
                 <input type="text" placeholder="Nhập mã giảm giá" id="discount-code">
                 <button id="apply-discount">Áp dụng</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- PAYMENT MODAL -->
+    <div class="payment-modal-overlay" id="paymentModalOverlay">
+        <div class="payment-modal">
+            <div class="payment-modal-header">
+                <div class="payment-modal-title">THÔNG TIN THANH TOÁN</div>
+                <button class="payment-modal-close" onclick="closePaymentModal()">&times;</button>
+            </div>
+            <div class="payment-modal-body">
+                <div class="form-row full">
+                    <div class="form-group">
+                        <label class="form-label">Họ và tên *</label>
+                        <input type="text" class="form-input" id="fullname" placeholder="Nhập họ và tên">
+                        <div class="form-error" id="error-fullname"></div>
+                    </div>
+                </div>
+                <div class="form-row full">
+                    <div class="form-group">
+                        <label class="form-label">Địa chỉ giao hàng *</label>
+                        <input type="text" class="form-input" id="address" placeholder="Nhập địa chỉ">
+                        <div class="form-error" id="error-address"></div>
+                    </div>
+                </div>
+                <div class="form-row">
+                    <div class="form-group">
+                        <label class="form-label">Số điện thoại *</label>
+                        <input type="tel" class="form-input" id="phone" placeholder="Nhập số điện thoại">
+                        <div class="form-error" id="error-phone"></div>
+                    </div>
+                    <div class="form-group">
+                        <label class="form-label">Email</label>
+                        <input type="email" class="form-input" id="email" placeholder="Nhập email">
+                        <div class="form-error" id="error-email"></div>
+                    </div>
+                </div>
+                <div class="form-row">
+                    <div class="form-group">
+                        <label class="form-label">Tỉnh/Thành phố *</label>
+                        <select class="form-select" id="province">
+                            <option value="">-- Chọn tỉnh/thành phố --</option>
+                            <option value="ha-noi">Hà Nội</option>
+                            <option value="ho-chi-minh">TP Hồ Chí Minh</option>
+                            <option value="hai-phong">Hải Phòng</option>
+                            <option value="da-nang">Đà Nẵng</option>
+                        </select>
+                        <div class="form-error" id="error-province"></div>
+                    </div>
+                    <div class="form-group">
+                        <label class="form-label">Quận/Huyện *</label>
+                        <select class="form-select" id="district">
+                            <option value="">-- Chọn quận/huyện --</option>
+                        </select>
+                        <div class="form-error" id="error-district"></div>
+                    </div>
+                </div>
+
+                <div class="payment-methods">
+                    <div class="payment-methods-title">PHƯƠNG THỨC THANH TOÁN</div>
+                    <div class="payment-method-options">
+                        <div class="payment-method-card active" onclick="selectPaymentMethod('zalopay')">
+                            <div class="payment-method-icon">💳</div>
+                            <div class="payment-method-name">Zalo Pay</div>
+                            <div class="payment-method-desc">Thanh toán qua Zalo Pay</div>
+                            <input type="hidden" name="payment-method" value="zalopay">
+                        </div>
+                        <div class="payment-method-card" onclick="selectPaymentMethod('cash')">
+                            <div class="payment-method-icon">💵</div>
+                            <div class="payment-method-name">Tiền mặt</div>
+                            <div class="payment-method-desc">Trả tiền khi nhận hàng</div>
+                            <input type="hidden" name="payment-method" value="cash">
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="payment-modal-footer">
+                <button class="btn-cancel" onclick="closePaymentModal()">QUAY LẠI</button>
+                <button class="btn-confirm" onclick="submitPayment()">HOÀN TẤT ĐƠN HÀNG</button>
             </div>
         </div>
     </div>
@@ -245,25 +589,83 @@
         function formatCurrency(num) {
             return num.toLocaleString('vi-VN') + '₫';
         }
+
+        function toggleSelectAll(isChecked) {
+            let cart = JSON.parse(localStorage.getItem('cart') || '[]');
+            cart.forEach(item => item.selected = isChecked);
+            localStorage.setItem('cart', JSON.stringify(cart));
+            renderCart();
+            updateOrderSummary();
+        }
+
+        function toggleItemSelection(idx) {
+            let cart = JSON.parse(localStorage.getItem('cart') || '[]');
+            if(cart[idx]) {
+                cart[idx].selected = !cart[idx].selected;
+                localStorage.setItem('cart', JSON.stringify(cart));
+                renderCart();
+                updateOrderSummary();
+            }
+        }
+
+        function updateOrderSummary() {
+            let cart = JSON.parse(localStorage.getItem('cart') || '[]');
+            let selectedItems = cart.filter(item => item.selected);
+            let selectedTotal = selectedItems.reduce((sum, item) =>
+                sum + (item.price || 0) * (item.quantity || 1), 0
+            );
+
+            document.getElementById('order-subtotal').textContent = formatCurrency(selectedTotal);
+            document.getElementById('order-total').textContent = formatCurrency(selectedTotal);
+
+            // Update Select All checkbox state
+            let allSelected = cart.length > 0 && selectedItems.length === cart.length;
+            document.getElementById('select-all-checkbox').checked = allSelected;
+        }
+
         function renderCart() {
             let cart = JSON.parse(localStorage.getItem('cart') || '[]');
             let cartList = document.getElementById('cart-list');
             let cartSummary = document.getElementById('cart-summary');
-            let subtotal = 0;
             cartList.innerHTML = '';
+
             if(cart.length === 0) {
                 cartSummary.innerHTML = 'Giỏ hàng trống.';
                 document.getElementById('order-subtotal').textContent = '0₫';
                 document.getElementById('order-total').textContent = '0₫';
                 document.getElementById('checkout-btn').disabled = true;
+                document.getElementById('select-all-checkbox').checked = false;
                 return;
             }
+
+            // Initialize items with selected: true if not already set
+            cart.forEach(item => {
+                if(item.selected === undefined) {
+                    item.selected = true;
+                }
+            });
+            localStorage.setItem('cart', JSON.stringify(cart));
+
             cartSummary.innerHTML = `Tổng cộng (${cart.length} sản phẩm)`;
+
             cart.forEach((item, idx) => {
                 let li = document.createElement('li');
-                li.className = 'cart-item';
+                li.className = 'cart-item' + (item.selected ? ' selected' : '');
+                li.setAttribute('data-index', idx);
+
+                let discountBadge = '<div class="discount-badge">-20%</div>';
+
                 li.innerHTML = `
-                    <div class="cart-item-img" style="background-image:url('${item.image || 'https://placehold.co/90x90'}')"></div>
+                    <div class="cart-item-checkbox">
+                        <input type="checkbox"
+                               class="item-checkbox"
+                               data-index="${idx}"
+                               ${item.selected ? 'checked' : ''}
+                               onchange="toggleItemSelection(${idx})">
+                    </div>
+                    <div class="cart-item-img" style="background-image:url('${item.image || 'https://placehold.co/90x90'}')">
+                        ${discountBadge}
+                    </div>
                     <div class="cart-item-info">
                         <div class="cart-item-brand">${item.brand || 'Aristino'}</div>
                         <div class="cart-item-name">${item.name}</div>
@@ -278,13 +680,12 @@
                     </div>
                 `;
                 cartList.appendChild(li);
-                subtotal += (item.price || 0) * (item.quantity || 1);
             });
-            document.getElementById('order-subtotal').textContent = formatCurrency(subtotal);
-            document.getElementById('order-shipping').textContent = '0₫';
-            document.getElementById('order-total').textContent = formatCurrency(subtotal);
+
             document.getElementById('checkout-btn').disabled = false;
+            updateOrderSummary();
         }
+
         function updateQty(idx, change) {
             let cart = JSON.parse(localStorage.getItem('cart') || '[]');
             if(cart[idx]) {
@@ -296,19 +697,241 @@
                 }
             }
         }
+
         function removeItem(idx) {
             let cart = JSON.parse(localStorage.getItem('cart') || '[]');
             cart.splice(idx, 1);
             localStorage.setItem('cart', JSON.stringify(cart));
             renderCart();
         }
-        document.getElementById('checkout-btn').onclick = function() {
-            if(JSON.parse(localStorage.getItem('cart') || '[]').length === 0) return;
-            alert('Chức năng thanh toán sẽ được cập nhật sớm!');
-        };
+
+        let selectedPaymentMethod = 'zalopay';
+
+        function openPaymentModal() {
+            let cart = JSON.parse(localStorage.getItem('cart') || '[]');
+            let selectedItems = cart.filter(item => item.selected);
+            if(selectedItems.length === 0) {
+                alert('Vui lòng chọn ít nhất một sản phẩm!');
+                return;
+            }
+            document.getElementById('paymentModalOverlay').classList.add('active');
+        }
+
+        function closePaymentModal() {
+            document.getElementById('paymentModalOverlay').classList.remove('active');
+            clearPaymentForm();
+        }
+
+        function clearPaymentForm() {
+            document.getElementById('fullname').value = '';
+            document.getElementById('address').value = '';
+            document.getElementById('phone').value = '';
+            document.getElementById('email').value = '';
+            document.getElementById('province').value = '';
+            document.getElementById('district').value = '';
+            clearAllErrors();
+        }
+
+        function clearAllErrors() {
+            document.querySelectorAll('.form-error').forEach(el => el.textContent = '');
+        }
+
+        function selectPaymentMethod(method) {
+            selectedPaymentMethod = method;
+            document.querySelectorAll('.payment-method-card').forEach(card => {
+                card.classList.remove('active');
+            });
+            event.currentTarget.classList.add('active');
+        }
+
+        function validatePaymentForm() {
+            clearAllErrors();
+            let isValid = true;
+
+            let fullname = document.getElementById('fullname').value.trim();
+            if(!fullname) {
+                document.getElementById('error-fullname').textContent = 'Vui lòng nhập họ và tên';
+                isValid = false;
+            }
+
+            let address = document.getElementById('address').value.trim();
+            if(!address) {
+                document.getElementById('error-address').textContent = 'Vui lòng nhập địa chỉ';
+                isValid = false;
+            }
+
+            let phone = document.getElementById('phone').value.trim();
+            if(!phone) {
+                document.getElementById('error-phone').textContent = 'Vui lòng nhập số điện thoại';
+                isValid = false;
+            } else if(!/^[0-9]{10,11}$/.test(phone)) {
+                document.getElementById('error-phone').textContent = 'Số điện thoại không hợp lệ';
+                isValid = false;
+            }
+
+            let province = document.getElementById('province').value;
+            if(!province) {
+                document.getElementById('error-province').textContent = 'Vui lòng chọn tỉnh/thành phố';
+                isValid = false;
+            }
+
+            let district = document.getElementById('district').value;
+            if(!district) {
+                document.getElementById('error-district').textContent = 'Vui lòng chọn quận/huyện';
+                isValid = false;
+            }
+
+            let email = document.getElementById('email').value.trim();
+            if(email && !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
+                document.getElementById('error-email').textContent = 'Email không hợp lệ';
+                isValid = false;
+            }
+
+            return isValid;
+        }
+
+        function submitPayment() {
+            if(!validatePaymentForm()) {
+                return;
+            }
+
+            if(selectedPaymentMethod === 'zalopay') {
+                // Thanh toán Zalo Pay
+                let cart = JSON.parse(localStorage.getItem('cart') || '[]');
+                let selectedItems = cart.filter(item => item.selected);
+                let selectedTotal = selectedItems.reduce((sum, item) =>
+                    sum + (item.price || 0) * (item.quantity || 1), 0
+                );
+
+                let orderData = {
+                    fullname: document.getElementById('fullname').value.trim(),
+                    address: document.getElementById('address').value.trim(),
+                    phone: document.getElementById('phone').value.trim(),
+                    email: document.getElementById('email').value.trim(),
+                    province: document.getElementById('province').value,
+                    district: document.getElementById('district').value,
+                    paymentMethod: 'zalopay',
+                    paymentStatus: 'pending',
+                    items: selectedItems,
+                    total: selectedTotal,
+                    orderDate: new Date().toISOString()
+                };
+
+                console.log('Đơn hàng Zalo Pay được tạo:', orderData);
+
+                // Lưu đơn hàng tạm thời
+                localStorage.setItem('pendingOrder', JSON.stringify(orderData));
+
+                // Gọi API backend để tạo payment link
+                createZaloPaymentLink(orderData);
+
+            } else if(selectedPaymentMethod === 'cash') {
+                // Thanh toán tiền mặt
+                let cart = JSON.parse(localStorage.getItem('cart') || '[]');
+                let selectedItems = cart.filter(item => item.selected);
+                let selectedTotal = selectedItems.reduce((sum, item) =>
+                    sum + (item.price || 0) * (item.quantity || 1), 0
+                );
+
+                let orderData = {
+                    fullname: document.getElementById('fullname').value.trim(),
+                    address: document.getElementById('address').value.trim(),
+                    phone: document.getElementById('phone').value.trim(),
+                    email: document.getElementById('email').value.trim(),
+                    province: document.getElementById('province').value,
+                    district: document.getElementById('district').value,
+                    paymentMethod: 'cash',
+                    paymentStatus: 'pending',
+                    items: selectedItems,
+                    total: selectedTotal,
+                    orderDate: new Date().toISOString()
+                };
+
+                console.log('Đơn hàng tiền mặt được tạo:', orderData);
+
+                // Lưu đơn hàng
+                let orders = JSON.parse(localStorage.getItem('orders') || '[]');
+                orders.push(orderData);
+                localStorage.setItem('orders', JSON.stringify(orders));
+
+                // Xóa giỏ hàng
+                localStorage.setItem('cart', JSON.stringify([]));
+                renderCart();
+
+                // Đóng payment modal
+                closePaymentModal();
+
+                alert('✅ Đơn hàng đã được tạo!\n\n📦 Thông tin giao hàng:\n' + orderData.fullname + '\nĐia chỉ: ' + orderData.address + '\nSố điện thoại: ' + orderData.phone + '\n\n💵 Tổng tiền: ' + formatCurrency(orderData.total) + '\n\nBạn sẽ trả tiền khi nhận hàng.\nMã đơn hàng sẽ được gửi qua SMS/Email');
+            }
+        }
+
+        async function createZaloPaymentLink(orderData) {
+            try {
+                // Gọi API backend để tạo payment link Zalo Pay
+                const response = await fetch('http://localhost:3000/api/zalopay/create-payment', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({
+                        amount: orderData.total,
+                        orderId: `ORDER-${Date.now()}`,
+                        orderInfo: `Thanh toan don hang - ${orderData.fullname}`,
+                        returnUrl: window.location.href,
+                        notifyUrl: 'http://localhost:3000/api/zalopay-webhook'
+                    })
+                });
+
+                const data = await response.json();
+
+                if (data.success) {
+                    console.log('Payment link tạo thành công:', data);
+
+                    // Chuyển hướng đến payment link của Zalo Pay
+                    if (data.order_url) {
+                        window.location.href = data.order_url;
+                    } else {
+                        alert('❌ Không nhận được URL thanh toán từ Zalo Pay');
+                    }
+                } else {
+                    alert('❌ Lỗi tạo payment link: ' + data.error);
+                }
+
+            } catch (error) {
+                console.error('Lỗi:', error);
+                alert('❌ Kết nối server thất bại. Hãy chắc chắn backend đang chạy!');
+            }
+        }
+
+        document.getElementById('checkout-btn').onclick = openPaymentModal;
+
         document.getElementById('apply-discount').onclick = function() {
             alert('Mã giảm giá chỉ demo giao diện!');
         };
+
+        document.getElementById('select-all-checkbox').onchange = function() {
+            toggleSelectAll(this.checked);
+        };
+
+        // Province and District data
+        const provinceDistrictData = {
+            'ha-noi': ['Ba Đình', 'Hoàn Kiếm', 'Tây Hồ', 'Cầu Giấy', 'Thanh Xuân'],
+            'ho-chi-minh': ['Quận 1', 'Quận 2', 'Quận 3', 'Quận 4', 'Quận 5'],
+            'hai-phong': ['Hồng Bàng', 'Ngô Quyền', 'Lê Chân', 'Thuận Thành'],
+            'da-nang': ['Hải Châu', 'Thanh Khê', 'Sơn Trà', 'Ngũ Hành Sơn']
+        };
+
+        document.getElementById('province').onchange = function() {
+            let province = this.value;
+            let districtSelect = document.getElementById('district');
+            districtSelect.innerHTML = '<option value="">-- Chọn quận/huyện --</option>';
+            if(province && provinceDistrictData[province]) {
+                provinceDistrictData[province].forEach(district => {
+                    districtSelect.innerHTML += `<option value="${district}">${district}</option>`;
+                });
+            }
+        };
+
         renderCart();
     </script>
     <script src="cart-drawer.js"></script>
