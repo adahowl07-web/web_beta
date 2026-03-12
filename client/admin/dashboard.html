@@ -1,0 +1,163 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Dashboard – The Hill Admin</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+    <link rel="stylesheet" href="admin.css">
+</head>
+<body>
+    <div class="loading" id="loading"><div class="spinner"></div></div>
+
+    <div class="admin-layout">
+        <!-- Sidebar -->
+        <aside class="sidebar">
+            <div class="sidebar-logo">
+                <h2>The Hill</h2>
+                <span>Admin Dashboard</span>
+            </div>
+            <nav class="sidebar-nav">
+                <div class="nav-section-label">Main Menu</div>
+                <a href="dashboard.html" class="nav-item"><i class="fas fa-tachometer-alt"></i> Dashboard</a>
+                <a href="products.html"  class="nav-item"><i class="fas fa-box"></i> Products</a>
+                <a href="orders.html"    class="nav-item"><i class="fas fa-shopping-cart"></i> Orders</a>
+            </nav>
+            <div class="sidebar-footer">
+                <button class="logout-btn" id="logoutBtn">
+                    <i class="fas fa-sign-out-alt"></i> Logout
+                </button>
+            </div>
+        </aside>
+
+        <!-- Main -->
+        <div class="main-content">
+            <div class="topbar">
+                <div class="topbar-title">Dashboard</div>
+                <div class="topbar-user">
+                    <i class="fas fa-user-shield"></i>
+                    <span>Administrator</span>
+                </div>
+            </div>
+
+            <div class="content-area">
+                <!-- Stats -->
+                <div class="stats-grid">
+                    <div class="stat-card">
+                        <div class="stat-icon blue"><i class="fas fa-box"></i></div>
+                        <div class="stat-info">
+                            <h3 id="statProducts">–</h3>
+                            <p>Total Products</p>
+                        </div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-icon dark"><i class="fas fa-images"></i></div>
+                        <div class="stat-info">
+                            <h3 id="statImages">–</h3>
+                            <p>Product Images</p>
+                        </div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-icon green"><i class="fas fa-shopping-cart"></i></div>
+                        <div class="stat-info">
+                            <h3 id="statOrders">–</h3>
+                            <p>Total Orders</p>
+                        </div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-icon orange"><i class="fas fa-chart-line"></i></div>
+                        <div class="stat-info">
+                            <h3 id="statRevenue">–</h3>
+                            <p>Revenue (Paid)</p>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Recent Products -->
+                <div class="card">
+                    <div class="card-header">
+                        <span class="card-title">Recent Products</span>
+                        <a href="products.html" class="btn btn-primary btn-sm">
+                            <i class="fas fa-arrow-right"></i> View All
+                        </a>
+                    </div>
+                    <div class="card-body" style="padding: 0;">
+                        <div class="table-responsive">
+                            <table>
+                                <thead>
+                                    <tr>
+                                        <th>Image</th>
+                                        <th>Name</th>
+                                        <th>Price</th>
+                                        <th>Created</th>
+                                        <th>Actions</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="recentProductsBody">
+                                    <tr><td colspan="5" style="text-align:center;color:#9ca3af;padding:30px">Loading...</td></tr>
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="admin.js"></script>
+    <script>
+        requireAdminLogin();
+
+        async function loadDashboard() {
+            showLoading();
+            try {
+                // Load stats
+                const statsRes = await apiFetch('/stats');
+                if (statsRes && statsRes.ok) {
+                    const stats = await statsRes.json();
+                    document.getElementById('statProducts').textContent = stats.totalProducts;
+                    document.getElementById('statImages').textContent   = stats.totalImages;
+                    document.getElementById('statOrders').textContent   = stats.totalOrders;
+                    document.getElementById('statRevenue').textContent  = formatPrice(stats.totalRevenue || 0);
+                }
+
+                // Load recent products (first 5)
+                const prodRes = await apiFetch('/products');
+                if (prodRes && prodRes.ok) {
+                    const products = await prodRes.json();
+                    const tbody    = document.getElementById('recentProductsBody');
+
+                    if (products.length === 0) {
+                        tbody.innerHTML = '<tr><td colspan="5"><div class="empty-state"><i class="fas fa-box-open"></i><h3>No products yet</h3><p>Add your first product to get started.</p></div></td></tr>';
+                        return;
+                    }
+
+                    tbody.innerHTML = products.slice(0, 5).map(p => `
+                        <tr>
+                            <td>
+                                ${p.thumbnail
+                                    ? `<img src="${p.thumbnail}" class="product-thumb" alt="${p.name}" onerror="this.outerHTML='<div class=\\'product-thumb-placeholder\\'><i class=\\'fas fa-image\\'></i></div>'">`
+                                    : '<div class="product-thumb-placeholder"><i class="fas fa-image"></i></div>'}
+                            </td>
+                            <td class="product-name-cell">${p.name}</td>
+                            <td>${formatPrice(p.price)}</td>
+                            <td style="color:#6b7280;font-size:0.8rem">${new Date(p.created_at).toLocaleDateString('vi-VN')}</td>
+                            <td>
+                                <div class="actions-cell">
+                                    <a href="edit-product.html?id=${p.id}" class="btn btn-edit btn-sm"><i class="fas fa-edit"></i> Edit</a>
+                                </div>
+                            </td>
+                        </tr>
+                    `).join('');
+                }
+            } catch (err) {
+                console.error(err);
+            } finally {
+                hideLoading();
+            }
+        }
+
+        loadDashboard();
+    </script>
+</body>
+</html>

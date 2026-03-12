@@ -1,0 +1,267 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Edit Product – The Hill Admin</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+    <link rel="stylesheet" href="admin.css">
+</head>
+<body>
+    <div class="loading" id="loading"><div class="spinner"></div></div>
+
+    <div class="admin-layout">
+        <!-- Sidebar -->
+        <aside class="sidebar">
+            <div class="sidebar-logo">
+                <h2>The Hill</h2>
+                <span>Admin Dashboard</span>
+            </div>
+            <nav class="sidebar-nav">
+                <div class="nav-section-label">Main Menu</div>
+                <a href="dashboard.html" class="nav-item"><i class="fas fa-tachometer-alt"></i> Dashboard</a>
+                <a href="products.html"  class="nav-item"><i class="fas fa-box"></i> Products</a>
+                <a href="orders.html"    class="nav-item"><i class="fas fa-shopping-cart"></i> Orders</a>
+            </nav>
+            <div class="sidebar-footer">
+                <button class="logout-btn" id="logoutBtn">
+                    <i class="fas fa-sign-out-alt"></i> Logout
+                </button>
+            </div>
+        </aside>
+
+        <!-- Main -->
+        <div class="main-content">
+            <div class="topbar">
+                <div class="topbar-title">Edit Product</div>
+                <div class="topbar-user">
+                    <i class="fas fa-user-shield"></i>
+                    <span>Administrator</span>
+                </div>
+            </div>
+
+            <div class="content-area">
+                <div class="page-header">
+                    <div>
+                        <h1 class="page-title">Edit Product</h1>
+                        <p class="page-subtitle" id="productIdLabel">Loading product...</p>
+                    </div>
+                    <a href="products.html" class="btn btn-secondary">
+                        <i class="fas fa-arrow-left"></i> Back to Products
+                    </a>
+                </div>
+
+                <div class="alert" id="alert"></div>
+
+                <form id="productForm">
+                    <!-- Basic Info -->
+                    <div class="card" style="margin-bottom: 20px;">
+                        <div class="card-header">
+                            <span class="card-title"><i class="fas fa-info-circle" style="margin-right:8px"></i>Basic Information</span>
+                        </div>
+                        <div class="card-body">
+                            <div class="form-grid">
+                                <div class="form-group full-width">
+                                    <label for="productName">Product Name <span style="color:#dc2626">*</span></label>
+                                    <input type="text" id="productName" placeholder="e.g. Áo Sơ Mi Nam The Hill Perfect Fit" required>
+                                </div>
+                                <div class="form-group">
+                                    <label for="productPrice">Price (VND) <span style="color:#dc2626">*</span></label>
+                                    <input type="number" id="productPrice" placeholder="e.g. 1250000" min="0" required>
+                                    <span class="form-hint" id="pricePreview" style="margin-top:4px;font-weight:600;color:#111827"></span>
+                                </div>
+                                <div class="form-group">
+                                    <label for="productCategory">Category</label>
+                                    <select id="productCategory">
+                                        <option value="">— No category —</option>
+                                    </select>
+                                </div>
+                                <div class="form-group">
+                                    <label for="productBadge">Badge</label>
+                                    <select id="productBadge">
+                                        <option value="">— None —</option>
+                                        <option value="NEW">NEW</option>
+                                        <option value="SALE">SALE</option>
+                                        <option value="EXCLUSIVE">EXCLUSIVE</option>
+                                    </select>
+                                </div>
+                                <div class="form-group full-width">
+                                    <label>Sizes</label>
+                                    <div id="sizeCheckboxes" style="display:flex;flex-wrap:wrap;gap:10px;margin-top:6px;">
+                                        <span style="color:#999;font-size:0.85rem;">Loading sizes...</span>
+                                    </div>
+                                </div>
+                                <div class="form-group full-width">
+                                    <label for="productDesc">Description</label>
+                                    <textarea id="productDesc" placeholder="Enter product description..."></textarea>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Images -->
+                    <div class="card" style="margin-bottom: 20px;">
+                        <div class="card-header">
+                            <span class="card-title"><i class="fas fa-images" style="margin-right:8px"></i>Product Images</span>
+                        </div>
+                        <div class="card-body">
+                            <p class="form-hint" style="margin-bottom:16px">
+                                Edit or replace image URLs. Existing images are pre-loaded below.
+                            </p>
+                            <div class="image-fields-container" id="imageFieldsContainer"></div>
+                            <button type="button" class="btn-add-image" id="addImageBtn">
+                                <i class="fas fa-plus"></i> Add Image Field
+                            </button>
+                        </div>
+                    </div>
+
+                    <!-- Submit -->
+                    <div class="form-actions">
+                        <button type="submit" class="btn btn-primary" id="submitBtn">
+                            <i class="fas fa-save"></i> Save Changes
+                        </button>
+                        <a href="products.html" class="btn btn-secondary">
+                            <i class="fas fa-times"></i> Cancel
+                        </a>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <script src="admin.js"></script>
+    <script>
+        requireAdminLogin();
+
+        const container  = document.getElementById('imageFieldsContainer');
+        const addImageBtn = document.getElementById('addImageBtn');
+        const params     = new URLSearchParams(window.location.search);
+        const productId  = params.get('id');
+
+        if (!productId) {
+            window.location.href = 'products.html';
+        }
+
+        // Live price preview
+        document.getElementById('productPrice').addEventListener('input', function() {
+            const val = parseInt(this.value);
+            document.getElementById('pricePreview').textContent = val > 0 ? formatPrice(val) : '';
+        });
+
+        // Load categories & sizes, then load product data
+        async function loadFormOptions() {
+            try {
+                const [catRes, sizeRes] = await Promise.all([
+                    apiFetch('/categories'),
+                    apiFetch('/sizes'),
+                ]);
+                if (catRes && catRes.ok) {
+                    const cats = await catRes.json();
+                    const sel = document.getElementById('productCategory');
+                    cats.forEach(c => {
+                        const opt = document.createElement('option');
+                        opt.value = c.id;
+                        opt.textContent = c.name;
+                        sel.appendChild(opt);
+                    });
+                }
+                if (sizeRes && sizeRes.ok) {
+                    const sizes = await sizeRes.json();
+                    const box = document.getElementById('sizeCheckboxes');
+                    box.innerHTML = '';
+                    sizes.forEach(s => {
+                        const label = document.createElement('label');
+                        label.style.cssText = 'display:inline-flex;align-items:center;gap:5px;padding:5px 10px;border:1px solid #ddd;border-radius:4px;cursor:pointer;font-size:0.85rem;';
+                        label.innerHTML = `<input type="checkbox" value="${s.id}" data-size-id="${s.id}"> ${s.name}`;
+                        box.appendChild(label);
+                    });
+                }
+            } catch (e) {
+                console.error('loadFormOptions', e);
+            }
+        }
+
+        async function loadProduct() {
+            showLoading();
+            try {
+                await loadFormOptions();
+
+                const res = await apiFetch(`/products/${productId}`);
+                if (!res || !res.ok) {
+                    showAlert('Product not found.', 'error');
+                    return;
+                }
+                const product = await res.json();
+
+                document.getElementById('productName').value  = product.name;
+                document.getElementById('productPrice').value = product.price;
+                document.getElementById('productDesc').value  = product.description || '';
+                document.getElementById('productIdLabel').textContent = `Product ID: #${product.id}`;
+                document.getElementById('pricePreview').textContent   = formatPrice(product.price);
+
+                if (product.category_id) {
+                    document.getElementById('productCategory').value = product.category_id;
+                }
+                if (product.badge) {
+                    document.getElementById('productBadge').value = product.badge;
+                }
+
+                // Tick các size đã có
+                if (product.size_ids && product.size_ids.length > 0) {
+                    product.size_ids.forEach(sid => {
+                        const cb = document.querySelector(`#sizeCheckboxes input[data-size-id="${sid}"]`);
+                        if (cb) cb.checked = true;
+                    });
+                }
+
+                // Build image fields with existing URLs
+                initImageFields(container, addImageBtn, product.images || []);
+            } catch {
+                showAlert('Failed to load product data.', 'error');
+            } finally {
+                hideLoading();
+            }
+        }
+
+        document.getElementById('productForm').addEventListener('submit', async function(e) {
+            e.preventDefault();
+
+            const name        = document.getElementById('productName').value.trim();
+            const price       = parseFloat(document.getElementById('productPrice').value);
+            const desc        = document.getElementById('productDesc').value.trim();
+            const category_id = document.getElementById('productCategory').value || null;
+            const badge       = document.getElementById('productBadge').value || null;
+            const size_ids    = [...document.querySelectorAll('#sizeCheckboxes input[type=checkbox]:checked')].map(cb => parseInt(cb.value));
+
+            if (!name) { showAlert('Please enter a product name.', 'error'); return; }
+            if (isNaN(price) || price < 0) { showAlert('Please enter a valid price.', 'error'); return; }
+
+            const images    = collectImageUrls(container);
+            showLoading();
+            const submitBtn = document.getElementById('submitBtn');
+            submitBtn.disabled = true;
+
+            try {
+                const res = await apiFetch(`/products/${productId}`, {
+                    method: 'PUT',
+                    body  : JSON.stringify({ name, price, description: desc, images, category_id, badge, size_ids }),
+                });
+
+                if (res && res.ok) {
+                    showAlert('Product updated successfully!', 'success');
+                } else {
+                    const data = res ? await res.json() : {};
+                    showAlert(data.error || 'Failed to update product.', 'error');
+                }
+            } catch {
+                showAlert('An error occurred. Please try again.', 'error');
+            } finally {
+                hideLoading();
+                submitBtn.disabled = false;
+            }
+        });
+
+        loadProduct();
+    </script>
+</body>
+</html>

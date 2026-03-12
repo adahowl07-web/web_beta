@@ -247,23 +247,6 @@
             font-size: 0.75rem;
             color: var(--color-secondary);
         }
-        .rating-section {
-            display: flex;
-            align-items: center;
-            gap: 10px;
-            font-size: 0.8rem;
-        }
-        .rating-stars {
-            color: #ffc107;
-        }
-        .rating-count {
-            color: var(--color-secondary);
-        }
-        .rating-link {
-            color: var(--color-red);
-            text-decoration: none;
-            cursor: pointer;
-        }
 
         /* --- OPTIONS --- */
         .option-section {
@@ -282,18 +265,6 @@
             display: flex;
             gap: 10px;
             flex-wrap: wrap;
-        }
-        .color-option {
-            width: 40px;
-            height: 40px;
-            border-radius: 4px;
-            border: 2px solid #ddd;
-            cursor: pointer;
-            transition: all 0.3s ease;
-        }
-        .color-option:hover,
-        .color-option.active {
-            border-color: var(--color-primary);
         }
         .size-option {
             padding: 10px 16px;
@@ -647,30 +618,11 @@
                 <div class="product-price-note">(Giá 05 bao gồm VAT)</div>
             </div>
 
-            <div class="rating-section">
-                <span class="rating-stars">★★★★★ 4.5</span>
-                <span class="rating-count">(600)</span>
-                <a href="#" class="rating-link">Viết đánh giá</a>
-            </div>
-
-            <!-- COLOR OPTION -->
-            <div class="option-section">
-                <label class="option-label">XANH KẺ VÀNG - JACQUARD HOA TIẾT</label>
-                <div class="option-values">
-                    <div class="color-option active" style="background-color: #1F3A5C;"></div>
-                </div>
-            </div>
-
             <!-- SIZE OPTION -->
             <div class="option-section">
                 <label class="option-label">Bảng Size</label>
-                <div class="option-values">
-                    <button class="size-option active">38</button>
-                    <button class="size-option">39</button>
-                    <button class="size-option">40</button>
-                    <button class="size-option">41</button>
-                    <button class="size-option">42</button>
-                    <button class="size-option">43</button>
+                <div class="option-values" id="sizeOptions">
+                    <!-- Sizes will be rendered dynamically from product data -->
                 </div>
             </div>
 
@@ -804,9 +756,6 @@
         const AUTH_TOKEN_KEY = 'authToken';
         let selectedSize = null;
         let selectedProductForForm = null;
-
-        // Default sizes for products
-        const DEFAULT_SIZES = ['XS', 'S', 'M', 'L', 'XL', 'XXL'];
 
         function checkAuthStatus() {
             return localStorage.getItem(AUTH_TOKEN_KEY);
@@ -1081,37 +1030,56 @@
                 // Update product title
                 document.querySelector('.product-title').textContent = product.name;
                 // Update product images
-                document.getElementById('mainImage').style.backgroundImage = `url('${product.image}')`;
-                // Update thumbnails (use same image for all)
-                document.querySelectorAll('.thumbnail').forEach(thumb => {
-                    thumb.style.backgroundImage = `url('${product.image}')`;
+                const imageList = product.images && product.images.length ? product.images : [product.image];
+                document.getElementById('mainImage').style.backgroundImage = `url('${imageList[0]}')`;
+
+                const thumbContainer = document.querySelector('.thumbnail-container');
+                thumbContainer.innerHTML = '';
+                imageList.forEach((url, idx) => {
+                    const thumb = document.createElement('div');
+                    thumb.className = 'thumbnail' + (idx === 0 ? ' active' : '');
+                    thumb.style.backgroundImage = `url('${url}')`;
+                    thumb.setAttribute('data-image', url);
+                    thumbContainer.appendChild(thumb);
                 });
                 // Update product price
                 document.querySelector('.product-price').textContent = product.price.toLocaleString('vi-VN') + '₫';
+
+                // Update sizes dynamically
+                const sizeContainer = document.getElementById('sizeOptions');
+                sizeContainer.innerHTML = '';
+                const sizes = product.sizes && product.sizes.length ? product.sizes : [];
+                if (sizes.length === 0) {
+                    sizeContainer.innerHTML = '<span style="font-size:0.85rem;color:var(--color-secondary);">Free Size</span>';
+                } else {
+                    sizes.forEach((size, idx) => {
+                        const btn = document.createElement('button');
+                        btn.className = 'size-option' + (idx === 0 ? ' active' : '');
+                        btn.textContent = size;
+                        sizeContainer.appendChild(btn);
+                    });
+                    selectedSize = sizes[0];
+                }
             }
 
-            // Thumbnail click handlers
-            const thumbnails = document.querySelectorAll('.thumbnail');
+            // Thumbnail click handlers (event delegation for dynamic thumbnails)
             const mainImage = document.getElementById('mainImage');
-
-            thumbnails.forEach(thumb => {
-                thumb.addEventListener('click', function() {
-                    const imageUrl = this.getAttribute('data-image');
-                    mainImage.style.backgroundImage = `url('${imageUrl}')`;
-
-                    // Update active state
-                    thumbnails.forEach(t => t.classList.remove('active'));
-                    this.classList.add('active');
-                });
+            document.querySelector('.thumbnail-container').addEventListener('click', function(e) {
+                const thumb = e.target.closest('.thumbnail');
+                if (!thumb) return;
+                const imageUrl = thumb.getAttribute('data-image');
+                mainImage.style.backgroundImage = `url('${imageUrl}')`;
+                document.querySelectorAll('.thumbnail').forEach(t => t.classList.remove('active'));
+                thumb.classList.add('active');
             });
 
-            // Size option click handlers
-            const sizeOptions = document.querySelectorAll('.size-option');
-            sizeOptions.forEach(option => {
-                option.addEventListener('click', function() {
-                    sizeOptions.forEach(opt => opt.classList.remove('active'));
-                    this.classList.add('active');
-                });
+            // Size option click handlers (event delegation for dynamic sizes)
+            document.getElementById('sizeOptions').addEventListener('click', function(e) {
+                const btn = e.target.closest('.size-option');
+                if (!btn) return;
+                this.querySelectorAll('.size-option').forEach(opt => opt.classList.remove('active'));
+                btn.classList.add('active');
+                selectedSize = btn.textContent;
             });
 
             // Tab handlers
@@ -1132,31 +1100,34 @@
                 });
             });
 
-            // Add to cart button
+            // Add to cart button - use the size already selected on the page
             const addToCartBtn = document.querySelector('.add-to-cart-btn');
             addToCartBtn.addEventListener('click', function() {
                 const selectedProduct = localStorage.getItem('selectedProduct');
-                const product = selectedProduct ? JSON.parse(selectedProduct) : {
-                    name: 'Áo Sơ Mi Nam Họa Tiết The Hill Perfect Fit ASS507SAH2',
-                    price: 1250000,
-                    image: 'https://cdn.hstatic.net/products/200000887901/img_5896.1_79dac8bc14d842148a4a72f3b8a54192.jpg',
-                    brand: 'The Hill'
-                };
+                const product = selectedProduct ? JSON.parse(selectedProduct) : null;
+                if (!product) return;
 
-                selectedProductForForm = product;
-                selectedSize = null;
+                const hasSizes = product.sizes && product.sizes.length > 0;
 
-                // Render size selection modal
-                const sizeContent = document.getElementById('sizeContent');
-                const sizes = product.sizes || DEFAULT_SIZES;
-                let html = '<p style="margin-bottom: 20px; color: var(--color-secondary);">Vui lòng chọn kích cỡ:</p>';
-                html += '<div class="size-grid">';
-                sizes.forEach(size => {
-                    html += `<button class="size-btn" onclick="selectSize('${size}')">${size}</button>`;
+                if (hasSizes && !selectedSize) {
+                    alert('Vui lòng chọn kích cỡ!');
+                    return;
+                }
+
+                let cart = localStorage.getItem('cart') ? JSON.parse(localStorage.getItem('cart')) : [];
+                const thumbImage = product.images && product.images.length ? product.images[0] : product.image;
+                cart.push({
+                    ...product,
+                    image: thumbImage,
+                    size: selectedSize || 'Free Size',
+                    quantity: 1
                 });
-                html += '</div>';
-                sizeContent.innerHTML = html;
-                document.getElementById('sizeModal').classList.add('active');
+                localStorage.setItem('cart', JSON.stringify(cart));
+
+                const cartCount = document.querySelector('.cart-count');
+                if (cartCount) cartCount.textContent = cart.length;
+                
+                alert('Sản phẩm đã được thêm vào giỏ hàng!');
             });
 
             // Wishlist button

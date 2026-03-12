@@ -1,0 +1,203 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Admin Login – The Hill</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+    <style>
+        *, *::before, *::after { margin: 0; padding: 0; box-sizing: border-box; }
+        body {
+            font-family     : 'Segoe UI', Arial, sans-serif;
+            background-color: #f3f4f6;
+            display         : flex;
+            align-items     : center;
+            justify-content : center;
+            min-height      : 100vh;
+        }
+        .login-card {
+            background-color: white;
+            border-radius   : 12px;
+            box-shadow      : 0 4px 24px rgba(0,0,0,0.1);
+            padding         : 44px 40px;
+            width           : 100%;
+            max-width       : 400px;
+        }
+        .login-logo {
+            text-align    : center;
+            margin-bottom : 30px;
+        }
+        .login-logo h1 {
+            font-size     : 1.5rem;
+            font-weight   : 800;
+            letter-spacing: 2px;
+            text-transform: uppercase;
+            color         : #111827;
+        }
+        .login-logo p {
+            font-size  : 0.75rem;
+            color      : #6b7280;
+            margin-top : 4px;
+            text-transform: uppercase;
+            letter-spacing: 0.8px;
+        }
+        .form-group {
+            margin-bottom: 18px;
+        }
+        label {
+            display       : block;
+            font-size     : 0.75rem;
+            font-weight   : 700;
+            text-transform: uppercase;
+            letter-spacing: 0.4px;
+            color         : #374151;
+            margin-bottom : 6px;
+        }
+        .input-wrap { position: relative; }
+        .input-wrap i {
+            position : absolute;
+            left     : 13px;
+            top      : 50%;
+            transform: translateY(-50%);
+            color    : #9ca3af;
+            font-size: 0.9rem;
+        }
+        input {
+            width           : 100%;
+            padding         : 10px 13px 10px 36px;
+            border          : 1px solid #d1d5db;
+            border-radius   : 7px;
+            font-size       : 0.9rem;
+            color           : #111827;
+            background-color: white;
+            font-family     : inherit;
+            transition      : border-color 0.15s, box-shadow 0.15s;
+        }
+        input:focus {
+            outline     : none;
+            border-color: #111827;
+            box-shadow  : 0 0 0 3px rgba(17,24,39,0.08);
+        }
+        .btn-login {
+            width           : 100%;
+            padding         : 12px;
+            background-color: #111827;
+            color           : white;
+            border          : none;
+            border-radius   : 7px;
+            font-size       : 0.9rem;
+            font-weight     : 700;
+            text-transform  : uppercase;
+            letter-spacing  : 0.5px;
+            cursor          : pointer;
+            transition      : background-color 0.15s;
+            font-family     : inherit;
+            margin-top      : 6px;
+        }
+        .btn-login:hover { background-color: #1f2937; }
+        .btn-login:disabled { background-color: #9ca3af; cursor: not-allowed; }
+        .alert {
+            padding      : 11px 14px;
+            border-radius: 7px;
+            font-size    : 0.85rem;
+            margin-bottom: 16px;
+            display      : none;
+            align-items  : center;
+            gap          : 8px;
+            border       : 1px solid;
+        }
+        .alert.show { display: flex; }
+        .alert-error { background-color: #fee2e2; color: #b91c1c; border-color: #fecaca; }
+        .back-link {
+            display        : block;
+            text-align     : center;
+            margin-top     : 18px;
+            font-size      : 0.8rem;
+            color          : #6b7280;
+            text-decoration: none;
+        }
+        .back-link:hover { color: #111827; }
+    </style>
+</head>
+<body>
+    <div class="login-card">
+        <div class="login-logo">
+            <h1>The Hill</h1>
+            <p>Admin Panel</p>
+        </div>
+
+        <div class="alert alert-error" id="alert">
+            <i class="fas fa-exclamation-circle"></i>
+            <span id="alertMsg"></span>
+        </div>
+
+        <form id="loginForm">
+            <div class="form-group">
+                <label for="username">Username</label>
+                <div class="input-wrap">
+                    <i class="fas fa-user"></i>
+                    <input type="text" id="username" placeholder="Enter username" autocomplete="username" required>
+                </div>
+            </div>
+            <div class="form-group">
+                <label for="password">Password</label>
+                <div class="input-wrap">
+                    <i class="fas fa-lock"></i>
+                    <input type="password" id="password" placeholder="Enter password" autocomplete="current-password" required>
+                </div>
+            </div>
+            <button type="submit" class="btn-login" id="loginBtn">
+                <i class="fas fa-sign-in-alt"></i> Login
+            </button>
+        </form>
+
+        <a href="/index.html" class="back-link">← Back to website</a>
+    </div>
+
+    <script>
+        // Redirect if already logged in
+        if (localStorage.getItem('adminToken')) {
+            window.location.href = '/admin/dashboard.html';
+        }
+
+        document.getElementById('loginForm').addEventListener('submit', async function(e) {
+            e.preventDefault();
+            const btn      = document.getElementById('loginBtn');
+            const alertEl  = document.getElementById('alert');
+            const alertMsg = document.getElementById('alertMsg');
+
+            btn.disabled    = true;
+            btn.textContent = 'Logging in...';
+            alertEl.classList.remove('show');
+
+            try {
+                const res = await fetch('/api/admin/login', {
+                    method : 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body   : JSON.stringify({
+                        username: document.getElementById('username').value.trim(),
+                        password: document.getElementById('password').value,
+                    }),
+                });
+
+                const data = await res.json();
+
+                if (res.ok && data.token) {
+                    localStorage.setItem('adminToken', data.token);
+                    window.location.href = '/admin/dashboard.html';
+                } else {
+                    alertMsg.textContent = data.error || 'Invalid username or password.';
+                    alertEl.classList.add('show');
+                    btn.disabled    = false;
+                    btn.innerHTML   = '<i class="fas fa-sign-in-alt"></i> Login';
+                }
+            } catch {
+                alertMsg.textContent = 'Cannot connect to server. Please try again.';
+                alertEl.classList.add('show');
+                btn.disabled  = false;
+                btn.innerHTML = '<i class="fas fa-sign-in-alt"></i> Login';
+            }
+        });
+    </script>
+</body>
+</html>
