@@ -25,6 +25,14 @@
         .size-checkbox-group label:hover{border-color:var(--sidebar-bg)}
         .size-checkbox-group label.checked{background:var(--sidebar-bg);color:#fff;border-color:var(--sidebar-bg)}
         .size-checkbox-group input[type="checkbox"]{display:none}
+
+        /* ── White tone dropzone overrides ───────── */
+        #dropzone{background:#fff;border-color:#d1d5db}
+        #dropzone:hover{background:#f9fafb;border-color:#374151}
+        #dropzone.is-dragover{background:#eff6ff;border-color:#2563eb}
+        #imagePreview{background:#fff}
+        #imagePreviewGrid{display:flex;flex-wrap:wrap;gap:8px;margin-top:10px}
+        #imagePreviewGrid .preview-thumb{width:66px;height:66px;object-fit:cover;border-radius:8px;border:1px solid #d1d5db}
     </style>
 </head>
 <body>
@@ -90,11 +98,19 @@
                             <label>Description</label>
                             <textarea id="fDescription" rows="3" placeholder="Product description..."></textarea>
                         </div>
-                        <!-- Images (textarea, comma-separated) -->
+                        <!-- Image drag & drop upload -->
                         <div class="form-group full-width">
-                            <label>Image URLs <span class="form-hint-inline">(comma-separated — first URL = main thumbnail)</span></label>
-                            <textarea id="fImages" rows="4" placeholder="https://example.com/img1.jpg, https://example.com/img2.jpg, ..."></textarea>
-                            <div id="imagePreviewRow" style="display:flex;gap:8px;flex-wrap:wrap;margin-top:8px"></div>
+                            <label>Product Image <span class="form-hint-inline">(upload local file, max 5MB)</span></label>
+                            <div id="dropzone" class="dropzone" role="button" tabindex="0" aria-label="Upload product image">
+                                <div class="dropzone-inner">
+                                    <i class="fas fa-cloud-upload-alt"></i>
+                                    <p>Kéo thả hoặc bấm để chọn ảnh</p>
+                                    <span>JPG / PNG / WEBP / GIF</span>
+                                </div>
+                            </div>
+                            <input type="file" id="productImageFile" accept="image/*" multiple hidden>
+                            <img id="imagePreview" src="" alt="Image preview" style="display:none;">
+                            <div id="imagePreviewGrid"></div>
                         </div>
                     </div>
                 </form>
@@ -290,18 +306,24 @@
         var fCategory       = document.getElementById('fCategory');
         var fBadge          = document.getElementById('fBadge');
         var fDescription    = document.getElementById('fDescription');
-        var fImages         = document.getElementById('fImages');
+        var dropzone        = document.getElementById('dropzone');
+        var productImageFile = document.getElementById('productImageFile');
+        var imagePreview    = document.getElementById('imagePreview');
         var fSizeGroup      = document.getElementById('fSizeGroup');
-        var imagePreviewRow = document.getElementById('imagePreviewRow');
         var modalAlert      = document.getElementById('modalAlert');
+        var existingImageUrls = [];
+        var imageDropzoneController = initProductImageDropzone('dropzone', 'productImageFile', 'imagePreview');
 
         function openModal(mode, product) {
             productForm.reset();
             editProductId.value = '';
             modalAlert.innerHTML = '';
             modalAlert.className = '';
-            imagePreviewRow.innerHTML = '';
             clearSizeChecks();
+            existingImageUrls = [];
+            if (imageDropzoneController) {
+                imageDropzoneController.clearSelection();
+            }
 
             if (mode === 'edit' && product) {
                 modalTitle.textContent = 'Edit Product';
@@ -311,7 +333,7 @@
                 fCategory.value    = product.category_id || '';
                 fBadge.value       = product.badge || '';
                 fDescription.value = product.description || '';
-                fImages.value      = (product.images || []).join(', ');
+                existingImageUrls  = (product.images || []).slice();
                 // Check matching sizes
                 var sizeNames = product.sizes || [];
                 var checks = fSizeGroup.querySelectorAll('input[type="checkbox"]');
@@ -321,10 +343,15 @@
                         checks[i].parentElement.classList.add('checked');
                     }
                 }
-                updateImagePreviews();
+                if (imageDropzoneController) {
+                    imageDropzoneController.setPreviewFromUrls(existingImageUrls);
+                }
             } else {
                 modalTitle.textContent = 'Add New Product';
                 if (activeCategoryId) fCategory.value = activeCategoryId;
+                if (imageDropzoneController) {
+                    imageDropzoneController.setPreviewFromUrls([]);
+                }
             }
             productModal.classList.add('show');
         }
@@ -339,40 +366,6 @@
         productModal.addEventListener('click', function(e) {
             if (e.target === productModal) closeModal();
         });
-
-        // Image preview on textarea change
-        var imageDebounce;
-        fImages.addEventListener('input', function() {
-            clearTimeout(imageDebounce);
-            imageDebounce = setTimeout(updateImagePreviews, 400);
-        });
-
-        function updateImagePreviews() {
-            var urls = parseImageUrls(fImages.value);
-            imagePreviewRow.innerHTML = '';
-            for (var i = 0; i < urls.length && i < 10; i++) {
-                var wrapper = document.createElement('div');
-                wrapper.style.cssText = 'position:relative;width:64px;height:64px;border-radius:6px;overflow:hidden;border:1px solid #e5e7eb;flex-shrink:0';
-                var img = document.createElement('img');
-                img.src = urls[i];
-                img.alt = '';
-                img.style.cssText = 'width:100%;height:100%;object-fit:cover';
-                img.onerror = function() { this.style.display = 'none'; };
-                wrapper.appendChild(img);
-                if (i === 0) {
-                    var badge = document.createElement('span');
-                    badge.textContent = 'MAIN';
-                    badge.style.cssText = 'position:absolute;bottom:0;left:0;right:0;background:rgba(0,0,0,.7);color:#fff;text-align:center;font-size:.55rem;font-weight:700;padding:2px 0;letter-spacing:.5px';
-                    wrapper.appendChild(badge);
-                }
-                imagePreviewRow.appendChild(wrapper);
-            }
-        }
-
-        function parseImageUrls(text) {
-            if (!text) return [];
-            return text.split(',').map(function(s) { return s.trim(); }).filter(Boolean);
-        }
 
         /* ── Size checkboxes ──────────────────────── */
         function renderSizeCheckboxes() {
@@ -419,37 +412,68 @@
             }
         }
 
+        function getSelectedCategoryFolderName() {
+            var selectedId = parseInt(fCategory.value, 10);
+            var categoryById = {
+                1: 'clothing',
+                2: 'accessories',
+                3: 'leather-goods',
+                4: 'brand'
+            };
+
+            if (categoryById[selectedId]) {
+                return categoryById[selectedId];
+            }
+
+            for (var i = 0; i < allCategories.length; i++) {
+                if (allCategories[i].id === selectedId) {
+                    var name = String(allCategories[i].name || '').trim().toLowerCase();
+                    if (name === 'clothing') return 'clothing';
+                    if (name === 'accessories') return 'accessories';
+                    if (name === 'leather goods') return 'leather-goods';
+                    if (name === 'brand') return 'brand';
+                }
+            }
+            return null;
+        }
+
         /* ══════════════════════════════════════════════
            SAVE PRODUCT (CREATE / UPDATE)
            ══════════════════════════════════════════════ */
-        modalSaveBtn.addEventListener('click', function() {
+        modalSaveBtn.addEventListener('click', async function() {
             if (!fName.value.trim() || !fPrice.value || !fCategory.value) {
                 modalAlert.className = 'alert alert-error show';
                 modalAlert.innerHTML = '<i class="fas fa-exclamation-circle"></i> Please fill Name, Price, and Category.';
                 return;
             }
 
-            var images = parseImageUrls(fImages.value);
-            var payload = {
-                name: fName.value.trim(),
-                price: parseFloat(fPrice.value),
-                category_id: parseInt(fCategory.value),
-                badge: fBadge.value.trim() || null,
-                description: fDescription.value.trim() || '',
-                images: images,
-                size_ids: getSelectedSizeIds()
-            };
+            var selectedFolder = getSelectedCategoryFolderName();
+            if (!selectedFolder) {
+                modalAlert.className = 'alert alert-error show';
+                modalAlert.innerHTML = '<i class="fas fa-exclamation-circle"></i> Invalid category for upload folder.';
+                return;
+            }
 
             var isEdit = !!editProductId.value;
-            var apiPath = isEdit ? '/products/' + editProductId.value : '/products';
-            var method  = isEdit ? 'PUT' : 'POST';
 
             showLoading();
-            apiFetch(apiPath, {
-                method: method,
-                body: JSON.stringify(payload)
-            })
-            .then(function(res) {
+            try {
+                var selectedFiles = imageDropzoneController ? imageDropzoneController.getSelectedFiles() : [];
+
+                var res = await saveProduct({
+                    isEdit: isEdit,
+                    editProductId: editProductId.value,
+                    name: fName.value,
+                    price: fPrice.value,
+                    categoryId: fCategory.value,
+                    badge: fBadge.value,
+                    description: fDescription.value,
+                    sizeIds: getSelectedSizeIds(),
+                    existingImageUrls: existingImageUrls,
+                    selectedImageFiles: selectedFiles,
+                    categoryFolderName: selectedFolder
+                });
+
                 hideLoading();
                 if (!res) return;
                 if (res.ok) {
@@ -457,17 +481,15 @@
                     closeModal();
                     loadProducts();
                 } else {
-                    return res.json().then(function(data) {
-                        modalAlert.className = 'alert alert-error show';
-                        modalAlert.innerHTML = '<i class="fas fa-exclamation-circle"></i> ' + escapeHtml(data.error || 'Save failed');
-                    });
+                    var data = await res.json();
+                    modalAlert.className = 'alert alert-error show';
+                    modalAlert.innerHTML = '<i class="fas fa-exclamation-circle"></i> ' + escapeHtml(data.error || 'Save failed');
                 }
-            })
-            .catch(function(err) {
+            } catch (err) {
                 hideLoading();
                 modalAlert.className = 'alert alert-error show';
                 modalAlert.innerHTML = '<i class="fas fa-exclamation-circle"></i> Network error: ' + escapeHtml(err.message);
-            });
+            }
         });
 
         /* ══════════════════════════════════════════════

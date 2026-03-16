@@ -39,6 +39,209 @@ async function apiFetch(path, options = {}) {
     return res;
 }
 
+// Upload a product image file and return the local relative URL from backend.
+async function uploadAdminImageFile(file, folderName) {
+    const token = getAdminToken();
+    const formData = new FormData();
+    formData.append('file', file);
+    formData.append('folderName', folderName);
+
+    let res;
+    try {
+        res = await fetch('/api/admin/upload', {
+            method: 'POST',
+            headers: token ? { 'Authorization': `Bearer ${token}` } : {},
+            body: formData,
+        });
+    } catch (error) {
+        if (error instanceof TypeError) {
+            throw new Error('Khong the ket noi API upload. Hay kiem tra backend Spring Boot dang chay va dung cong.');
+        }
+        throw error;
+    }
+
+    if (res.status === 401) {
+        adminLogout();
+        throw new Error('Unauthorized');
+    }
+
+    if (!res.ok) {
+        let message = 'Upload failed';
+        try {
+            const data = await res.json();
+            message = data.error || message;
+        } catch (_) {
+            // Keep fallback message if response is not JSON.
+        }
+        throw new Error(message);
+    }
+
+    return (await res.text()).trim();
+}
+
+// ── Product modal: drag-drop uploader + save flow ─────────
+function initProductImageDropzone(dropzoneId = 'dropzone', inputId = 'productImageFile', previewId = 'imagePreview', previewGridId = 'imagePreviewGrid') {
+    const dropzone = document.getElementById(dropzoneId);
+    const fileInput = document.getElementById(inputId);
+    const preview = document.getElementById(previewId);
+    const previewGrid = document.getElementById(previewGridId);
+
+    if (!dropzone || !fileInput || !preview) {
+        return null;
+    }
+
+    let selectedFiles = [];
+    let objectUrls = [];
+
+    function cleanupObjectUrls() {
+        for (const url of objectUrls) {
+            URL.revokeObjectURL(url);
+        }
+        objectUrls = [];
+    }
+
+    function setPrimaryPreview(url) {
+        if (!url || selectedFiles.length === 0) {
+            preview.src = '';
+            preview.style.display = 'none';
+            return;
+        }
+        preview.src = url;
+        preview.style.display = 'block';
+    }
+
+    function renderPreviewGrid(urls) {
+        if (!previewGrid) return;
+        previewGrid.innerHTML = '';
+        if (!urls || urls.length <= 1) {
+            return;
+        }
+
+        for (let i = 1; i < urls.length; i++) {
+            const img = document.createElement('img');
+            img.src = urls[i];
+            img.alt = 'Preview ' + (i + 1);
+            img.className = 'preview-thumb';
+            previewGrid.appendChild(img);
+        }
+    }
+
+    function setSelected(files) {
+        cleanupObjectUrls();
+        selectedFiles = Array.isArray(files) ? files : [];
+        if (selectedFiles.length > 0) {
+            objectUrls = selectedFiles.map(file => URL.createObjectURL(file));
+            setPrimaryPreview(objectUrls[0]);
+            renderPreviewGrid(objectUrls);
+            dropzone.classList.add('has-file');
+        } else {
+            setPrimaryPreview('');
+            renderPreviewGrid([]);
+            dropzone.classList.remove('has-file');
+        }
+    }
+
+    function pickFromInput() {
+        const files = fileInput.files && fileInput.files.length ? Array.from(fileInput.files) : [];
+        setSelected(files);
+    }
+
+    dropzone.addEventListener('click', () => fileInput.click());
+    fileInput.addEventListener('change', pickFromInput);
+
+    dropzone.addEventListener('dragover', e => {
+        e.preventDefault();
+        dropzone.classList.add('is-dragover');
+    });
+
+    dropzone.addEventListener('dragleave', e => {
+        e.preventDefault();
+        dropzone.classList.remove('is-dragover');
+    });
+
+    dropzone.addEventListener('drop', e => {
+        e.preventDefault();
+        dropzone.classList.remove('is-dragover');
+
+        const files = e.dataTransfer && e.dataTransfer.files && e.dataTransfer.files.length
+            ? Array.from(e.dataTransfer.files)
+            : [];
+        if (files.length === 0) {
+            return;
+        }
+
+        setSelected(files);
+    });
+
+    return {
+        getSelectedFiles: () => selectedFiles.slice(),
+        clearSelection: () => {
+            setSelected([]);
+            fileInput.value = '';
+        },
+        setPreviewFromUrls: (urls) => {
+            cleanupObjectUrls();
+            selectedFiles = [];
+            fileInput.value = '';
+            dropzone.classList.remove('has-file');
+            const list = Array.isArray(urls) ? urls.filter(Boolean) : [];
+            setPrimaryPreview(list.length > 0 ? list[0] : '');
+            renderPreviewGrid(list);
+        }
+    };
+}
+
+async function saveProduct(options) {
+    const {
+        isEdit,
+        editProductId,
+        name,
+        price,
+        categoryId,
+        badge,
+        description,
+        sizeIds,
+        existingImageUrls,
+        selectedImageFiles,
+        categoryFolderName
+    } = options;
+
+    const apiPath = isEdit ? `/products/${editProductId}` : '/products';
+    const method = isEdit ? 'PUT' : 'POST';
+
+    let images = Array.isArray(existingImageUrls) ? existingImageUrls.slice() : [];
+    if (Array.isArray(selectedImageFiles) && selectedImageFiles.length > 0) {
+        const uploadedUrls = [];
+        for (const file of selectedImageFiles) {
+            const uploadedUrl = await uploadAdminImageFile(file, categoryFolderName);
+            uploadedUrls.push(uploadedUrl);
+        }
+        images = uploadedUrls;
+    }
+
+    const payload = {
+        name: name.trim(),
+        price: parseFloat(price),
+        category_id: parseInt(categoryId, 10),
+        badge: (badge || '').trim() || null,
+        description: (description || '').trim(),
+        images,
+        size_ids: Array.isArray(sizeIds) ? sizeIds : []
+    };
+
+    try {
+        return await apiFetch(apiPath, {
+            method,
+            body: JSON.stringify(payload)
+        });
+    } catch (error) {
+        if (error instanceof TypeError) {
+            throw new Error('Khong the ket noi API. Hay kiem tra backend Spring Boot dang chay va dung cong.');
+        }
+        throw error;
+    }
+}
+
 // ── Sidebar active link ─────────────────────────────────────
 function setActiveSidebarItem() {
     const page = window.location.pathname.split('/').pop();

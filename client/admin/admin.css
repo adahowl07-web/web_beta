@@ -11,6 +11,7 @@
     --content-bg    : #f3f4f6;
     --white         : #ffffff;
     --text-primary  : #111827;
+
     --text-secondary: #6b7280;
     --border-color  : #e5e7eb;
     --shadow        : 0 1px 3px rgba(0, 0, 0, 0.1), 0 1px 2px rgba(0, 0, 0, 0.06);
@@ -774,4 +775,80 @@ textarea { resize: vertical; min-height: 120px; }
     display        : flex;
     justify-content: flex-end;
     gap            : 10px;
+}
+
+/* ── Product image dropzone (white theme) ────────────────── */
+.dropzone {
+    width: 100%;
+    min-height: 150px;
+    border: 2px dashed #d1d5db;
+    border-radius: 12px;
+    background: #ffffff;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    text-align: center;
+    cursor: pointer;
+    transition: border-color 0.18s ease, background-color 0.18s ease, box-shadow 0.18s ease;
+}
+
+.dropzone:hover {
+    border-color: #374151;
+    background: #f9fafb;
+}
+
+.dropzone.is-dragover {
+    border-color: #2563eb;
+    background: #eff6ff;
+    box-shadow: 0 0 0 4px rgba(37, 99, 235, 0.12);
+}
+
+.dropzone.has-file {
+    border-color: #16a34a;
+}
+
+.dropzone-inner i {
+    display: block;
+    font-size: 1.6rem;
+    color: #475569;
+    margin-bottom: 8px;
+}
+
+.dropzone-inner p {
+    font-size: 0.96rem;
+    font-weight: 700;
+    color: #111827;
+}
+
+.dropzone-inner span {
+    display: block;
+    margin-top: 6px;
+    color: #6b7280;
+    font-size: 0.78rem;
+}
+
+#imagePreview {
+    margin-top: 12px;
+    width: 100%;
+    max-height: 220px;
+    object-fit: cover;
+    border-radius: 10px;
+    border: 1px solid #d1d5db;
+    background: #ffffff;
+}
+
+#imagePreviewGrid {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+    margin-top: 10px;
+}
+
+#imagePreviewGrid .preview-thumb {
+    width: 66px;
+    height: 66px;
+    object-fit: cover;
+    border-radius: 8px;
+    border: 1px solid #d1d5db;
+    background: #ffffff;
 }
