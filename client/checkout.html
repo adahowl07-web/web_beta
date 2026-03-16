@@ -548,7 +548,13 @@
                 <div class="payment-methods">
                     <div class="payment-methods-title">PHƯƠNG THỨC THANH TOÁN</div>
                     <div class="payment-method-options">
-                        <div class="payment-method-card active" onclick="selectPaymentMethod('zalopay')">
+                        <div class="payment-method-card active" onclick="selectPaymentMethod('momo')">
+                            <div class="payment-method-icon">📱</div>
+                            <div class="payment-method-name">MoMo</div>
+                            <div class="payment-method-desc">Thanh toán qua ví MoMo</div>
+                            <input type="hidden" name="payment-method" value="momo">
+                        </div>
+                        <div class="payment-method-card" onclick="selectPaymentMethod('zalopay')">
                             <div class="payment-method-icon">💳</div>
                             <div class="payment-method-name">Zalo Pay</div>
                             <div class="payment-method-desc">Thanh toán qua Zalo Pay</div>
@@ -705,7 +711,7 @@
             renderCart();
         }
 
-        let selectedPaymentMethod = 'zalopay';
+        let selectedPaymentMethod = 'momo';
 
         function openPaymentModal() {
             let cart = JSON.parse(localStorage.getItem('cart') || '[]');
@@ -795,8 +801,8 @@
                 return;
             }
 
-            if(selectedPaymentMethod === 'zalopay') {
-                // Thanh toán Zalo Pay
+            if(selectedPaymentMethod === 'momo' || selectedPaymentMethod === 'zalopay') {
+                // Thanh toán online (MoMo/ZaloPay)
                 let cart = JSON.parse(localStorage.getItem('cart') || '[]');
                 let selectedItems = cart.filter(item => item.selected);
                 let selectedTotal = selectedItems.reduce((sum, item) =>
@@ -810,20 +816,24 @@
                     email: document.getElementById('email').value.trim(),
                     province: document.getElementById('province').value,
                     district: document.getElementById('district').value,
-                    paymentMethod: 'zalopay',
+                    paymentMethod: selectedPaymentMethod,
                     paymentStatus: 'pending',
                     items: selectedItems,
                     total: selectedTotal,
                     orderDate: new Date().toISOString()
                 };
 
-                console.log('Đơn hàng Zalo Pay được tạo:', orderData);
+                console.log('Đơn hàng online được tạo:', orderData);
 
                 // Lưu đơn hàng tạm thời
                 localStorage.setItem('pendingOrder', JSON.stringify(orderData));
 
-                // Gọi API backend để tạo payment link
-                createZaloPaymentLink(orderData);
+                // Gọi API backend để tạo payment link theo cổng đã chọn
+                if (selectedPaymentMethod === 'momo') {
+                    createMomoPaymentLink(orderData);
+                } else {
+                    createZaloPaymentLink(orderData);
+                }
 
             } else if(selectedPaymentMethod === 'cash') {
                 // Thanh toán tiền mặt
@@ -868,7 +878,7 @@
         async function createZaloPaymentLink(orderData) {
             try {
                 // Gọi API backend để tạo payment link Zalo Pay
-                const response = await fetch('http://localhost:3000/api/zalopay/create-payment', {
+                const response = await fetch('/api/zalopay/create-payment', {
                     method: 'POST',
                     headers: {
                         'Content-Type': 'application/json'
@@ -878,7 +888,7 @@
                         orderId: `ORDER-${Date.now()}`,
                         orderInfo: `Thanh toan don hang - ${orderData.fullname}`,
                         returnUrl: window.location.href,
-                        notifyUrl: 'http://localhost:3000/api/zalopay-webhook'
+                        notifyUrl: `${window.location.origin}/api/zalopay-webhook`
                     })
                 });
 
@@ -901,6 +911,121 @@
                 console.error('Lỗi:', error);
                 alert('❌ Kết nối server thất bại. Hãy chắc chắn backend đang chạy!');
             }
+        }
+
+        async function createMomoPaymentLink(orderData) {
+            try {
+                const response = await fetch('/api/momo/create-payment', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({
+                        amount: Math.round(orderData.total),
+                        orderId: `ORDER-${Date.now()}`,
+                        orderInfo: `Thanh toan don hang - ${orderData.fullname}`,
+                        returnUrl: window.location.href,
+                        notifyUrl: `${window.location.origin}/api/momo-webhook`
+                    })
+                });
+
+                const data = await response.json();
+
+                if (data.success) {
+                    const redirectUrl = data.payUrl || (data.data && data.data.payUrl) || data.qrCodeUrl;
+                    if (redirectUrl) {
+                        window.location.href = redirectUrl;
+                    } else {
+                        alert('❌ Không nhận được URL thanh toán từ MoMo');
+                    }
+                } else {
+                    alert('❌ Lỗi tạo payment link MoMo: ' + data.error);
+                }
+            } catch (error) {
+                console.error('Lỗi:', error);
+                alert('❌ Kết nối server thất bại. Hãy chắc chắn backend đang chạy!');
+            }
+        }
+
+        function removeSelectedItemsFromCart() {
+            const cart = JSON.parse(localStorage.getItem('cart') || '[]');
+            const remainingItems = cart.filter(item => !item.selected);
+            localStorage.setItem('cart', JSON.stringify(remainingItems));
+            renderCart();
+        }
+
+        async function saveOrderToDatabase(orderData, paymentMeta) {
+            const response = await fetch('/api/orders', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({
+                    orderId: paymentMeta.orderId,
+                    fullname: orderData.fullname,
+                    email: orderData.email,
+                    phone: orderData.phone,
+                    total: orderData.total,
+                    paymentStatus: 'completed',
+                    transactionId: paymentMeta.transId
+                })
+            });
+
+            const data = await response.json();
+
+            if (!response.ok || !data.success) {
+                throw new Error(data.error || 'Khong the luu don hang vao he thong');
+            }
+
+            return data;
+        }
+
+        async function handlePaymentReturn() {
+            const params = new URLSearchParams(window.location.search);
+            const resultCode = params.get('resultCode');
+            const orderId = params.get('orderId');
+            const transId = params.get('transId');
+            const message = params.get('message');
+
+            if (resultCode === null) {
+                return;
+            }
+
+            const processedOrderId = localStorage.getItem('processedPaymentOrderId');
+            if (processedOrderId && orderId && processedOrderId === orderId) {
+                window.history.replaceState({}, document.title, window.location.pathname);
+                return;
+            }
+
+            const pendingOrderRaw = localStorage.getItem('pendingOrder');
+            if (!pendingOrderRaw) {
+                alert('⚠️ Không tìm thấy đơn hàng chờ xử lý.');
+                window.history.replaceState({}, document.title, window.location.pathname);
+                return;
+            }
+
+            const pendingOrder = JSON.parse(pendingOrderRaw);
+
+            if (resultCode === '0') {
+                try {
+                    await saveOrderToDatabase(pendingOrder, { orderId, transId });
+
+                    localStorage.removeItem('pendingOrder');
+                    if (orderId) {
+                        localStorage.setItem('processedPaymentOrderId', orderId);
+                    }
+                    removeSelectedItemsFromCart();
+
+                    alert('✅ Thanh toán MoMo thành công! Đơn hàng đã được lưu vào hệ thống.');
+                } catch (error) {
+                    console.error('Lỗi lưu đơn hàng:', error);
+                    alert('⚠️ Thanh toán thành công nhưng lưu đơn thất bại. Vui lòng liên hệ hỗ trợ.\n' + error.message);
+                }
+            } else {
+                alert(`❌ Thanh toán thất bại (${resultCode})${message ? ': ' + decodeURIComponent(message) : ''}`);
+            }
+
+            window.history.replaceState({}, document.title, window.location.pathname);
         }
 
         document.getElementById('checkout-btn').onclick = openPaymentModal;
@@ -932,6 +1057,7 @@
             }
         };
 
+        handlePaymentReturn();
         renderCart();
     </script>
     <script src="cart-drawer.js"></script>

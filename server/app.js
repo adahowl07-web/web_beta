@@ -3,6 +3,7 @@ const cors    = require('cors');
 const { Pool } = require('pg');
 require('dotenv').config();
 const { createZaloPayPayment, handleZaloPayWebhook } = require('./zalopay-payment');
+const { createMomoPayment, handleMomoWebhook } = require('./momo-payment');
 const adminRoutes = require('./admin');
 
 const app  = express();
@@ -17,6 +18,25 @@ const pool = new Pool({
     database: process.env.PG_DATABASE || 'thehill_db',
 });
 
+(async function ensureOrdersTable() {
+    try {
+        await pool.query(`
+            CREATE TABLE IF NOT EXISTS orders (
+                id             SERIAL PRIMARY KEY,
+                app_trans_id   VARCHAR(100),
+                customer_name  VARCHAR(255),
+                customer_email VARCHAR(255),
+                customer_phone VARCHAR(30),
+                total_amount   NUMERIC(15, 2) NOT NULL DEFAULT 0,
+                status         VARCHAR(50)    NOT NULL DEFAULT 'pending',
+                created_at     TIMESTAMP      DEFAULT CURRENT_TIMESTAMP
+            )
+        `);
+    } catch (err) {
+        console.error('[init orders table]', err.message);
+    }
+})();
+
 // Middleware
 app.use(cors());
 app.use(express.json());
@@ -26,6 +46,61 @@ app.use(express.static(__dirname + '/../client/admin')); // Cho phép truy cập
 // Routes
 app.post('/api/zalopay/create-payment', createZaloPayPayment);
 app.post('/api/zalopay-webhook', handleZaloPayWebhook);
+app.post('/api/momo/create-payment', createMomoPayment);
+app.post('/api/momo-webhook', handleMomoWebhook);
+
+// Lưu đơn hàng sau khi thanh toán thành công
+app.post('/api/orders', async (req, res) => {
+    const {
+        orderId,
+        fullname,
+        email,
+        phone,
+        total,
+        paymentStatus,
+        transactionId,
+    } = req.body || {};
+
+    if (!fullname || !phone || !Number.isFinite(Number(total))) {
+        return res.status(400).json({
+            success: false,
+            error: 'Thong tin don hang khong hop le',
+        });
+    }
+
+    try {
+        const { rows } = await pool.query(
+            `INSERT INTO orders (
+                app_trans_id,
+                customer_name,
+                customer_email,
+                customer_phone,
+                total_amount,
+                status
+            ) VALUES ($1, $2, $3, $4, $5, $6)
+            RETURNING id, app_trans_id, status, created_at`,
+            [
+                transactionId || orderId || null,
+                fullname,
+                email || null,
+                phone,
+                Number(total),
+                paymentStatus || 'pending',
+            ]
+        );
+
+        return res.json({
+            success: true,
+            order: rows[0],
+        });
+    } catch (err) {
+        console.error('[POST /api/orders]', err.message);
+        return res.status(500).json({
+            success: false,
+            error: err.message,
+        });
+    }
+});
 
 // Admin routes
 app.use('/api/admin', adminRoutes);
@@ -109,6 +184,6 @@ app.get('/api/health', (req, res) => {
 
 app.listen(PORT, () => {
     console.log(`🚀 Server chạy tại http://localhost:${PORT}`);
-    console.log(`📌 Hãy cập nhật file .env với thông tin Zalo Pay của bạn!`);
+    console.log(`📌 Hãy cập nhật file .env với thông tin thanh toán (ZaloPay/MoMo) của bạn!`);
     console.log(`🔐 Admin panel: http://localhost:${PORT}/admin/login.html`);
 });
